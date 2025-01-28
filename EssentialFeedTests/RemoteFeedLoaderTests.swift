@@ -63,7 +63,8 @@ final class RemoteFeedLoaderTests: XCTestCase {
         let (sut, client) = makeSutFactory()
         
         expect(sut, toCompleteWith: .success([]), when: {
-            let emptyListJSON = Data("{\"items\": []}".utf8)
+            // let emptyListJSON = Data("{\"items\": []}".utf8)
+            let emptyListJSON = makeItemsJSON([])
             client.complete(withStatusCode: 200, data: emptyListJSON)
         })
     }
@@ -163,16 +164,6 @@ final class RemoteFeedLoaderTests: XCTestCase {
         func complete(with error: NSError, at index: Int = 0) {
             messages[index].completion(.failure(error))
         }
-        
-//        func complete(withStatusCode code: Int, data: Data = Data(), at index: Int = 0) {
-//            let response = HTTPURLResponse(
-//                url: requestedURLs[index],
-//                statusCode: code,
-//                httpVersion: nil,
-//                headerFields: nil
-//            )!
-//            messages[index].completion(.success(data, response))
-//        }
         
         func complete(withStatusCode code: Int, data: Data, at index: Int = 0) {
             let response = HTTPURLResponse(
