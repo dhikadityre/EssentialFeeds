@@ -93,6 +93,23 @@ final class RemoteFeedLoaderTests: XCTestCase {
         })
     }
     
+    func test_load_doesNotDeliverResultAfterSUTInstanceHasBeenDealocated() {
+        let url = URL(string: "https://any-url.com")!
+        let client = HTTPClientSpy()
+        var sut: RemoteFeedLoader? = RemoteFeedLoader( // kita buat opsional jadi kita bisa melakukan dealocated (membatalkan alokasi) dengan menyetelnya jadi NIL
+            url: url,
+            client: client
+        )
+        
+        var captureResult = [RemoteFeedLoader.Results]()
+        sut?.load { captureResult.append($0) }
+        
+        sut = nil // ini berarti akan di batalkan mermori alokasinya (deallocated). dan tidak akan ada di memori lagi.
+        client.complete(withStatusCode: 200, data: makeItemsJSON([]))
+        
+        XCTAssertTrue(captureResult.isEmpty)
+    }
+    
     // MARK: - Helpers
     private func makeSutFactory(
         url: URL = URL(string: "https://a-url.com")!,
