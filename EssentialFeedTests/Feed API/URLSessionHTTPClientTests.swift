@@ -12,7 +12,7 @@ import EssentialFeed
 class URLSessionHTTPClient {
     private let session: URLSession
     
-    init(session: URLSession = .shared) { // karena kita tidak perlu melakukan mocking pada URLSession, kia bisa gunakan default value `.shared`
+    init(session: URLSession = .shared) {
         self.session = session
     }
     
@@ -21,7 +21,7 @@ class URLSessionHTTPClient {
             if let error = error {
                 completion(.failure(error))
             }
-        }.resume() // tambahkan ini
+        }.resume()
     }
 }
 
@@ -55,7 +55,8 @@ class URLSessionHTTPClientTests: XCTestCase {
     
     // MARK: - Helpers
     private class URLProtocolStub: URLProtocol {
-        private static var stubs = [URL: Stub]()
+        // private static var stubs = [URL: Stub]()
+        private static var stubs: Stub?
         
         private struct Stub {
             let data: Data?
@@ -65,7 +66,14 @@ class URLSessionHTTPClientTests: XCTestCase {
         
         // penyesuaian berdasarkan table
         static func stub(url: URL, data: Data?, response: URLResponse?, error: Error?) {
+            /*
             stubs[url] = Stub(
+                data: data,
+                response: response,
+                error: error
+            )
+            */
+            stubs = Stub(
                 data: data,
                 response: response,
                 error: error
@@ -78,15 +86,19 @@ class URLSessionHTTPClientTests: XCTestCase {
         
         static func stopInterceptingRequest() {
             URLProtocol.unregisterClass(URLProtocolStub.self)
-            stubs = [:]
+            // stubs = [:]
+            stubs = nil
         }
         
         // can init adalah method/function dari class. dan saat ini kita belum memiliki instance-nya.
         // URLLoadingSystem akan membuat instancenya hanya jika kita menghandle requestnya
         override class func canInit(with request: URLRequest) -> Bool {
+            /*
             // true -> developer wajib menangani requestnya sendiri baik itu sukses atau gagal.
             guard let url = request.url else { return false }
             return URLProtocolStub.stubs[url] != nil // if ada url -> true
+            */
+            true
         }
         
         override class func canonicalRequest(for request: URLRequest) -> URLRequest {
@@ -95,20 +107,22 @@ class URLSessionHTTPClientTests: XCTestCase {
         
         // untuk loading url dan memulai sesuatu
         override func startLoading() {
+            /*
             guard
                 let url = request.url,
                 let stub = URLProtocolStub.stubs[url]
             else { return }
+            */
             
-            if let data = stub.data {
+            if let data = URLProtocolStub.stubs?.data {
                 client?.urlProtocol(self, didLoad: data)
             }
             
-            if let response = stub.response {
+            if let response = URLProtocolStub.stubs?.response {
                 client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
             }
             
-            if let error = stub.error {
+            if let error = URLProtocolStub.stubs?.error {
                 client?.urlProtocol(self, didFailWithError: error)
             }
             client?.urlProtocolDidFinishLoading(self)
