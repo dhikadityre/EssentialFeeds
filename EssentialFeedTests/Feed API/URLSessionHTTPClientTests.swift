@@ -26,6 +26,26 @@ class URLSessionHTTPClient {
 }
 
 class URLSessionHTTPClientTests: XCTestCase {
+    func test_getFromURL_performGETRequestWithURL() {
+        URLProtocolStub.startInterceptingRequest()
+        let givenUrl = URL(string: "https://a-url-by-dhika")!
+        let exp = expectation(description: "Wait for request")
+        let sut = URLSessionHTTPClient()
+        
+        URLProtocolStub.observeRequest { request in
+            XCTAssertEqual(request.url, givenUrl)
+            XCTAssertEqual(request.httpMethod, "GET")
+            exp.fulfill()
+        }
+        
+        sut.get(from: givenUrl) { _ in }
+        
+        wait(for: [exp], timeout: 1.0)
+        
+        URLProtocolStub.stopInterceptingRequest()
+    }
+    
+    
     func test_getFromURL_failsOnRequestError() {
         URLProtocolStub.startInterceptingRequest()
         let url = URL(string: "http://any-url.com")!
@@ -57,6 +77,7 @@ class URLSessionHTTPClientTests: XCTestCase {
     private class URLProtocolStub: URLProtocol {
         // private static var stubs = [URL: Stub]()
         private static var stubs: Stub?
+        private static var requestObserver: ((URLRequest) -> Void)?
         
         private struct Stub {
             let data: Data?
@@ -80,6 +101,10 @@ class URLSessionHTTPClientTests: XCTestCase {
             )
         }
         
+        static func observeRequest(observer: @escaping (URLRequest) -> Void) {
+            requestObserver = observer
+        }
+        
         static func startInterceptingRequest() {
             URLProtocol.registerClass(URLProtocolStub.self)
         }
@@ -88,6 +113,7 @@ class URLSessionHTTPClientTests: XCTestCase {
             URLProtocol.unregisterClass(URLProtocolStub.self)
             // stubs = [:]
             stubs = nil
+            requestObserver = nil
         }
         
         // can init adalah method/function dari class. dan saat ini kita belum memiliki instance-nya.
@@ -98,7 +124,8 @@ class URLSessionHTTPClientTests: XCTestCase {
             guard let url = request.url else { return false }
             return URLProtocolStub.stubs[url] != nil // if ada url -> true
             */
-            true
+            requestObserver?(request)
+            return true
         }
         
         override class func canonicalRequest(for request: URLRequest) -> URLRequest {
