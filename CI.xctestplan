@@ -18,7 +18,8 @@
         }
       ]
     },
-    "performanceAntipatternCheckerEnabled" : true
+    "performanceAntipatternCheckerEnabled" : true,
+    "threadSanitizerEnabled" : true
   },
   "testTargets" : [
     {
