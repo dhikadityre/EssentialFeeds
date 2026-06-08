@@ -21,17 +21,20 @@ class URLSessionHTTPClientTests: XCTestCase {
     
     func test_getFromURL_performGETRequestWithURL() {
         let givenUrl = anyURL()
-        let exp = expectation(description: "Wait for request")
         
+        var receivedRequest = [URLRequest]()
         URLProtocolStub.observeRequest { request in
-            XCTAssertEqual(request.url, givenUrl)
-            XCTAssertEqual(request.httpMethod, "GET")
-            exp.fulfill()
+            receivedRequest.append(request)
         }
         
-        makeSUT().get(from: givenUrl) { _ in }
+        let exp = expectation(description: "Wait for request completion")
+        makeSUT().get(from: givenUrl) { _ in exp.fulfill() }
         
         wait(for: [exp], timeout: 1.0)
+        
+        XCTAssertEqual(receivedRequest.count, 1)
+        XCTAssertEqual(receivedRequest.first?.url, givenUrl)
+        XCTAssertEqual(receivedRequest.first?.httpMethod, "GET")
     }
     
     
@@ -349,7 +352,7 @@ class URLSessionHTTPClientTests: XCTestCase {
             guard let url = request.url else { return false }
             return URLProtocolStub.stubs[url] != nil // if ada url -> true
             */
-            requestObserver?(request)
+            // requestObserver?(request)
             return true
         }
         
@@ -365,6 +368,11 @@ class URLSessionHTTPClientTests: XCTestCase {
                 let stub = URLProtocolStub.stubs[url]
             else { return }
             */
+            
+            if let requestObserver = URLProtocolStub.requestObserver {
+                client?.urlProtocolDidFinishLoading(self)
+                return requestObserver(request)
+            }
             
             if let data = URLProtocolStub.stubs?.data {
                 client?.urlProtocol(self, didLoad: data)
