@@ -1,5 +1,5 @@
 //
-//  RemoteFeedLoaderTests.swift
+//  LoadFeedFromRemoteUseCaseTest.swift
 //  EssentialFeedTests
 //
 //  Created by @algoreadme on 30/11/24.
@@ -8,7 +8,7 @@
 import XCTest
 import EssentialFeed
 
-final class RemoteFeedLoaderTests: XCTestCase {
+final class LoadFeedFromRemoteUseCaseTest: XCTestCase {
     func test_init_doesNotRequestDataFromURL() {
         let (_, client) = makeSutFactory()
         XCTAssertTrue(client.requestedURLs.isEmpty)
