@@ -16,7 +16,15 @@ class LocalFeedLoader {
     }
     
     func save(_ items: [FeedItem]) {
-        store.deleteCachedFeed()
+        /// Disini kita dapat menjalankan secara sync atau biarkan framework menjalankan secara async
+        /// yang pasti adalah `deleteCachedFeed` harus dijalankan terlebih dahulu
+        //// store.deleteCachedFeed()
+        
+        store.deleteCachedFeed { [unowned self] error in
+            if error == nil {
+                store.insert(items)
+            }
+        }
     }
 }
 
@@ -25,14 +33,27 @@ class LocalFeedLoader {
 /// making sure not to leak framework details into the use case
 /// artinya: Feed Store ini digunakan sebagai contract yg dibutuhkan client tanpa perlu memikirkan akan menggunakan framework nantinya.
 class FeedStore {
+    typealias DeletionCompletion = (Error?) -> Void
+    
     var deletedCachedFeedCallCount = 0
     var insertCallCount = 0
     
-    func deleteCachedFeed() {
+    private var deletionCompletion = [DeletionCompletion]()
+    
+    func deleteCachedFeed(completion: @escaping DeletionCompletion) {
         deletedCachedFeedCallCount += 1
+        deletionCompletion.append(completion)
     }
     
     func completeDeletion(with error: Error, at index: Int = 0) {
+        deletionCompletion[index](error)
+    }
+    
+    func completeDeletionSuccessfully(at index: Int = 0) {
+        deletionCompletion[index](nil)
+    }
+    
+    func insert(_ items: [FeedItem]) {
         insertCallCount += 1
     }
 }
@@ -61,6 +82,18 @@ final class CacheFeedUseCaseTests: XCTestCase {
         sut.save(items)
         store.completeDeletion(with: error)
         
+        XCTAssertEqual(store.insertCallCount, 1)
+    }
+    
+    /// save cache setelah berhasil mendelete
+    func test_save_requestNewCacheInsertionOnSuccessfullDeletion() {
+        let (sut, store) = makeSUT()
+        let items = [uniqueItem(), uniqueItem()]
+        
+        sut.save(items)
+        store.completeDeletionSuccessfully()
+        
+        XCTAssertEqual(store.deletedCachedFeedCallCount, 1)
         XCTAssertEqual(store.insertCallCount, 1)
     }
     
