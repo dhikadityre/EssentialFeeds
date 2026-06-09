@@ -17,7 +17,7 @@ class LocalFeedLoader {
         self.currentDate = currentDate
     }
     
-    func save(_ items: [FeedItem]) {
+    func save(_ items: [FeedItem], errorHandler: @escaping (Error?) -> Void) {
         /// Disini kita dapat menjalankan secara sync atau biarkan framework menjalankan secara async
         /// yang pasti adalah `deleteCachedFeed` harus dijalankan terlebih dahulu
         //// store.deleteCachedFeed()
@@ -25,6 +25,8 @@ class LocalFeedLoader {
         store.deleteCachedFeed { [unowned self] error in
             if error == nil {
                 store.insert(items, timestamp: self.currentDate())
+            } else {
+                errorHandler(error)
             }
         }
     }
@@ -85,7 +87,7 @@ final class CacheFeedUseCaseTests: XCTestCase {
         let (sut, store) = makeSUT()
         let items = [uniqueItem(), uniqueItem()]
         
-        sut.save(items)
+        sut.save(items) { _ in }
         
         // XCTAssertEqual(store.deletedCachedFeedCallCount, 1)
         XCTAssertEqual(store.receivedMessage, [.deleteCachedFeed])
@@ -97,7 +99,7 @@ final class CacheFeedUseCaseTests: XCTestCase {
         let items = [uniqueItem(), uniqueItem()]
         let error = anyNSError()
         
-        sut.save(items)
+        sut.save(items) { _ in }
         store.completeDeletion(with: error)
         
         // XCTAssertEqual(store.deletedCachedFeedCallCount, 1)
@@ -130,7 +132,7 @@ final class CacheFeedUseCaseTests: XCTestCase {
         /// Then, we can `easily` control the current date/time during tests.
         let (sut, store) = makeSUT(currentDate: { timestamp } )
         
-        sut.save(items)
+        sut.save(items) { _ in }
         store.completeDeletionSuccessfully()
         
         // XCTAssertEqual(store.insertion.count, 1)
@@ -145,6 +147,24 @@ final class CacheFeedUseCaseTests: XCTestCase {
                     )
             ]
         )
+    }
+    
+    /// Kondisi Error pada saat melakukan delete data
+    func test_save_failsOnDeletionError() {
+        let (sut, store) = makeSUT()
+        let items = [uniqueItem(), uniqueItem()]
+        let deletionError = anyNSError()
+        
+        let exp = expectation(description: "Wait for save completion")
+        var receivedError: Error?
+        sut.save(items) { error in
+            receivedError = error
+            exp.fulfill()
+        }
+        store.completeDeletion(with: deletionError)
+        wait(for: [exp], timeout: 1.0)
+        
+        XCTAssertEqual(receivedError as? NSError, deletionError)
     }
     
     // MARK: - Helper
