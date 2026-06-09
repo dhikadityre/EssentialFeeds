@@ -48,7 +48,10 @@ final class CacheFeedUseCaseTests: XCTestCase {
     }
     
     // MARK: - Helper
-    private func makeSUT() -> (
+    private func makeSUT(
+        file: StaticString = #file,
+        line: UInt = #line
+    ) -> (
         sut: LocalFeedLoader,
         store: FeedStore
     ) {
@@ -58,7 +61,7 @@ final class CacheFeedUseCaseTests: XCTestCase {
         /// We do so by test-driving the interface the use case needs for its collaborator,
         /// rather then defining the interface upfront to facilitate a spesific framework implementation.
         let sut = LocalFeedLoader(store: store)
-        trackForMemoryLeaks(store)
+        trackForMemoryLeaks(store, file: file, line: line)
         trackForMemoryLeaks(sut)
         return (sut, store)
     }
