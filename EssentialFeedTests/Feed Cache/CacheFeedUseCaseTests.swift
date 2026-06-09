@@ -17,16 +17,20 @@ class LocalFeedLoader {
         self.currentDate = currentDate
     }
     
-    func save(_ items: [FeedItem], errorHandler: @escaping (Error?) -> Void) {
+    func save(_ items: [FeedItem], completion: @escaping (Error?) -> Void) {
         /// Disini kita dapat menjalankan secara sync atau biarkan framework menjalankan secara async
         /// yang pasti adalah `deleteCachedFeed` harus dijalankan terlebih dahulu
         //// store.deleteCachedFeed()
         
         store.deleteCachedFeed { [unowned self] error in
             if error == nil {
-                store.insert(items, timestamp: self.currentDate())
+                store.insert(
+                    items,
+                    timestamp: self.currentDate(),
+                    completion: completion
+                )
             } else {
-                errorHandler(error)
+                completion(error)
             }
         }
     }
@@ -38,12 +42,14 @@ class LocalFeedLoader {
 /// artinya: Feed Store ini digunakan sebagai contract yg dibutuhkan client tanpa perlu memikirkan akan menggunakan framework nantinya.
 class FeedStore {
     typealias DeletionCompletion = (Error?) -> Void
+    typealias InsertionCompletion = (Error?) -> Void
     
     // var deletedCachedFeedCallCount = 0
     // var insertCallCount = 0
     // var insertion = [(items: [FeedItem], timestamp: Date)]() // tupple untuk insert data
     
     private var deletionCompletion = [DeletionCompletion]()
+    private var insertionCompletion = [InsertionCompletion]()
     
     enum ReceivedMessage: Equatable {
         case deleteCachedFeed
@@ -62,16 +68,25 @@ class FeedStore {
         deletionCompletion[index](error)
     }
     
+    func completeInsertion(with error: Error, at index: Int = 0) {
+        insertionCompletion[index](error)
+    }
+    
     func completeDeletionSuccessfully(at index: Int = 0) {
         deletionCompletion[index](nil)
     }
     
-    func insert(_ items: [FeedItem], timestamp: Date) {
+    func insert(
+        _ items: [FeedItem],
+        timestamp: Date,
+        completion: @escaping InsertionCompletion
+    ) {
         // insertCallCount += 1
         // insertion.append((items, timestamp))
         receivedMessage.append(
             .insert(items: items, timestamp: timestamp)
         )
+        insertionCompletion.append(completion)
     }
 }
 
@@ -149,7 +164,7 @@ final class CacheFeedUseCaseTests: XCTestCase {
         )
     }
     
-    /// Kondisi Error pada saat melakukan delete data
+    /// Kondisi Error pada saat melakukan `delete` data
     func test_save_failsOnDeletionError() {
         let (sut, store) = makeSUT()
         let items = [uniqueItem(), uniqueItem()]
@@ -165,6 +180,25 @@ final class CacheFeedUseCaseTests: XCTestCase {
         wait(for: [exp], timeout: 1.0)
         
         XCTAssertEqual(receivedError as? NSError, deletionError)
+    }
+    
+    /// Kondisi Error pada saat melakukan `insert` data
+    func test_save_failsOnInsertionError() {
+        let (sut, store) = makeSUT()
+        let items = [uniqueItem(), uniqueItem()]
+        let insertionError = anyNSError()
+        
+        let exp = expectation(description: "Wait for save completion")
+        var receivedError: Error?
+        sut.save(items) { error in
+            receivedError = error
+            exp.fulfill()
+        }
+        store.completeDeletionSuccessfully()
+        store.completeInsertion(with: insertionError)
+        wait(for: [exp], timeout: 1.0)
+        
+        XCTAssertEqual(receivedError as? NSError, insertionError)
     }
     
     // MARK: - Helper
