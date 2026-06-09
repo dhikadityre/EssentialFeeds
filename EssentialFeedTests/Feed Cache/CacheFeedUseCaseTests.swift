@@ -26,9 +26,14 @@ class LocalFeedLoader {
 /// artinya: Feed Store ini digunakan sebagai contract yg dibutuhkan client tanpa perlu memikirkan akan menggunakan framework nantinya.
 class FeedStore {
     var deletedCachedFeedCallCount = 0
+    var insertCallCount = 0
     
     func deleteCachedFeed() {
         deletedCachedFeedCallCount += 1
+    }
+    
+    func completeDeletion(with error: Error, at index: Int = 0) {
+        insertCallCount += 1
     }
 }
 
@@ -45,6 +50,18 @@ final class CacheFeedUseCaseTests: XCTestCase {
         sut.save(items)
         
         XCTAssertEqual(store.deletedCachedFeedCallCount, 1)
+    }
+    
+    /// tidak melakukan save cache ketika gagal mendelete
+    func test_save_doesNotRequestCacheInsertionOnDeletionError() {
+        let (sut, store) = makeSUT()
+        let items = [uniqueItem(), uniqueItem()]
+        let error = anyNSError()
+        
+        sut.save(items)
+        store.completeDeletion(with: error)
+        
+        XCTAssertEqual(store.insertCallCount, 1)
     }
     
     // MARK: - Helper
@@ -71,5 +88,9 @@ final class CacheFeedUseCaseTests: XCTestCase {
     
     private func anyURL() -> URL {
         return URL(string: "http://any-url.com")!
+    }
+    
+    private func anyNSError() -> NSError {
+        NSError(domain: "any-error", code: 0)
     }
 }
