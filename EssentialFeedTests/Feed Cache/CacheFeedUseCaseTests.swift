@@ -62,7 +62,7 @@ final class CacheFeedUseCaseTests: XCTestCase {
         /// rather then defining the interface upfront to facilitate a spesific framework implementation.
         let sut = LocalFeedLoader(store: store)
         trackForMemoryLeaks(store, file: file, line: line)
-        trackForMemoryLeaks(sut)
+        trackForMemoryLeaks(sut, file: file, line: line)
         return (sut, store)
     }
     private func uniqueItem() -> FeedItem {
