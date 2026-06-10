@@ -11,12 +11,14 @@ public final class LocalFeedLoader {
     private let store: FeedStore
     private let currentDate: () -> Date
     
+    public typealias SaveResult = Error?
+    
     public init(store: FeedStore, currentDate: @escaping () -> Date) {
         self.store = store
         self.currentDate = currentDate
     }
     
-    public func save(_ items: [FeedItem], completion: @escaping (Error?) -> Void) {
+    public func save(_ items: [FeedItem], completion: @escaping (SaveResult) -> Void) {
         /// Disini kita dapat menjalankan secara sync atau biarkan framework menjalankan secara async
         /// yang pasti adalah `deleteCachedFeed` harus dijalankan terlebih dahulu
         //// store.deleteCachedFeed()
@@ -31,7 +33,7 @@ public final class LocalFeedLoader {
         }
     }
     
-    private func cache(_ items: [FeedItem], completion: @escaping (Error?) -> Void) {
+    private func cache(_ items: [FeedItem], completion: @escaping (SaveResult) -> Void) {
         store.insert(
             items,
             timestamp: currentDate(),
