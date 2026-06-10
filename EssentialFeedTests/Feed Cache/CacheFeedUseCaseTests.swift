@@ -22,7 +22,8 @@ class LocalFeedLoader {
         /// yang pasti adalah `deleteCachedFeed` harus dijalankan terlebih dahulu
         //// store.deleteCachedFeed()
         
-        store.deleteCachedFeed { [unowned self] error in
+        store.deleteCachedFeed { [weak self] error in
+            guard let self else { return }
             if error == nil {
                 store.insert(
                     items,
@@ -152,6 +153,24 @@ final class CacheFeedUseCaseTests: XCTestCase {
             store.completeDeletionSuccessfully()
             store.completeInsertionSuccessfully()
         })
+    }
+    
+    /// Dalam proses menyimpan namun instance tidak di alocation kan.
+    /// expect -> completion block tidak di trigger
+    /// Delete
+    func test_save_doesNotDeliverDeletionErrorAfterSUTInstanceHasBeenDealocated() {
+        let store = FeedStoreSpy()
+        var sut: LocalFeedLoader? = LocalFeedLoader(store: store, currentDate: Date.init)
+        
+        var receivedError = [Error?]()
+        sut?.save([uniqueItem()]) { error in
+            receivedError.append(error)
+        }
+        
+        sut = nil
+        store.completeDeletion(with: anyNSError())
+        
+        XCTAssertTrue(receivedError.isEmpty)
     }
     
     // MARK: - Helper
