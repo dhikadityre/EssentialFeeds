@@ -57,6 +57,9 @@ final class CacheFeedUseCaseTests: XCTestCase {
     func test_save_requestNewCacheInsertionWithTimestampOnSuccessfullDeletion() {
         let timestamp = Date()
         let items = [uniqueItem(), uniqueItem()]
+        let localItems = items.map({
+            LocalFeedItem(id: $0.id, description: $0.description, location: $0.location, imageURL: $0.imageURL)
+        })
         
         /// The current data/time is not a pure function (every time we create a Date, it has a different value the current date/time)
         /// Instead letting the use case produce the current date via impure the `Date.init()` directly,
@@ -75,7 +78,7 @@ final class CacheFeedUseCaseTests: XCTestCase {
             store.receivedMessage, [
                 .deleteCachedFeed,
                     .insert(
-                        items: items,
+                        items: localItems,
                         timestamp: timestamp
                     )
             ]
@@ -221,7 +224,7 @@ final class CacheFeedUseCaseTests: XCTestCase {
         
         enum ReceivedMessage: Equatable {
             case deleteCachedFeed
-            case insert(items: [FeedItem], timestamp: Date)
+            case insert(items: [LocalFeedItem], timestamp: Date)
         }
         
         private(set) var receivedMessage = [ReceivedMessage]()
@@ -249,7 +252,7 @@ final class CacheFeedUseCaseTests: XCTestCase {
         }
         
         func insert(
-            _ items: [FeedItem],
+            _ items: [LocalFeedItem],
             timestamp: Date,
             completion: @escaping InsertionCompletion
         ) {
