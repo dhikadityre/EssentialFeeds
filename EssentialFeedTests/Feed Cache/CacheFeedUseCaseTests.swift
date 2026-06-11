@@ -75,7 +75,7 @@ final class CacheFeedUseCaseTests: XCTestCase {
             store.receivedMessage, [
                 .deleteCachedFeed,
                     .insert(
-                        items: feed.local,
+                        feed: feed.local,
                         timestamp: timestamp
                     )
             ]
@@ -267,7 +267,7 @@ final class CacheFeedUseCaseTests: XCTestCase {
             // insertCallCount += 1
             // insertion.append((items, timestamp))
             receivedMessage.append(
-                .insert(items: items, timestamp: timestamp)
+                .insert(feed: items, timestamp: timestamp)
             )
             insertionCompletion.append(completion)
         }
