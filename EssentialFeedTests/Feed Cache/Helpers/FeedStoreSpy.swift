@@ -22,7 +22,7 @@ class FeedStoreSpy: FeedStore {
     
     private var deletionCompletion = [DeletionCompletion]()
     private var insertionCompletion = [InsertionCompletion]()
-    private var retrieveCompletion = [InsertionCompletion]()
+    private var retrieveCompletion = [RetrieveCompletion]()
     
     enum ReceivedMessage: Equatable {
         case deleteCachedFeed
@@ -73,10 +73,16 @@ class FeedStoreSpy: FeedStore {
     }
     
     func completeRetrieval(with error: Error, at index: Int = 0) {
-        retrieveCompletion[index](error)
+        retrieveCompletion[index](.failure(error))
     }
     
     func completeRetrieveWithEmptyCache(at index: Int = 0) {
-        retrieveCompletion[index](nil)
+        retrieveCompletion[index](.empty)
+    }
+    
+    func completeRetrieval(with feed: [LocalFeedImage], timestamp: Date, at index: Int = 0) {
+        retrieveCompletion[index](
+            .found(feed: feed, timestamp: timestamp)
+        )
     }
 }
