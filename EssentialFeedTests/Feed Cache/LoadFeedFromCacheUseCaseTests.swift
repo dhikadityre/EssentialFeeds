@@ -145,6 +145,16 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
         })
     }
     
+    /// system melakukan delete cache ketika error terjadi
+    func test_load_deleteCachesOnRetrievalError() {
+        let (sut, store) = makeSUT()
+        
+        sut.load { _ in }
+        store.completeRetrieval(with: anyNSError())
+        
+        XCTAssertEqual(store.receivedMessage, [.retrieve, .deleteCachedFeed])
+    }
+    
     private func makeSUT(
         currentDate: @escaping () -> Date = Date.init,
         file: StaticString = #file,
