@@ -110,6 +110,23 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
         })
     }
     
+    /// system mendeliver no image saat cache lebih dari seminggu.
+    func test_load_deliversNoImagesOnSevenDaysOldCache() {
+        let feed = uniqueImageFeed()
+        let fixedCurrentDate = Date()
+        let sevenOldTimestamp = fixedCurrentDate
+            .adding(days: -7)
+        
+        let (sut, store) = makeSUT(currentDate: { fixedCurrentDate })
+        
+        expect(sut, toCompleteWith: .success([]), when: {
+            store.completeRetrieval(
+                with: feed.local,
+                timestamp: sevenOldTimestamp
+            )
+        })
+    }
+    
     private func makeSUT(
         currentDate: @escaping () -> Date = Date.init,
         file: StaticString = #file,
