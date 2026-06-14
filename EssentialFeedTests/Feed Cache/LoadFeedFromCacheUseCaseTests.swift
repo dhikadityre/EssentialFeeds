@@ -156,7 +156,7 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
     }
     
     /// system melakukan tidak men-delete cache ketika empty/kosong
-    func test_load_doesNotdeleteCachesOnEmptyCache() {
+    func test_load_hasNoSideEffectOnEmptyCache() {
         let (sut, store) = makeSUT()
         
         sut.load { _ in }

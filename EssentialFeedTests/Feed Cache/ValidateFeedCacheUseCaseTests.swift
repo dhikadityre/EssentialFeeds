@@ -36,6 +36,16 @@ class ValidateFeedCacheUseCaseTests: XCTestCase {
         XCTAssertEqual(store.receivedMessage, [.retrieve, .deleteCachedFeed])
     }
     
+    /// system melakukan tidak men-delete cache ketika empty/kosong
+    func test_validateCache_doesNotdeleteCachesOnEmptyCache() {
+        let (sut, store) = makeSUT()
+        
+        sut.validateCache()
+        store.completeRetrieveWithEmptyCache()
+        
+        XCTAssertEqual(store.receivedMessage, [.retrieve])
+    }
+    
     // MARK: - Helper
     private func makeSUT(
         currentDate: @escaping () -> Date = Date.init,
