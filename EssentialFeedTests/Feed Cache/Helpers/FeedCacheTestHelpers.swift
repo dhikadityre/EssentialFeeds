@@ -24,6 +24,7 @@ func uniqueImageFeed() -> (
 }
 
 
+/// Policy
 extension Date {
     private var feedCacheMaxAgeInDays: Int {
         return 7
@@ -33,7 +34,7 @@ extension Date {
         return adding(days: -feedCacheMaxAgeInDays)
     }
     
-    func adding(days: Int) -> Date {
+    private func adding(days: Int) -> Date {
         return Calendar(identifier: .gregorian)
             .date(
                 byAdding: .day,
@@ -41,7 +42,10 @@ extension Date {
                 to: self
             )!
     }
-    
+}
+  
+/// Date Helper
+extension Date {
     func adding(seconds: TimeInterval) -> Date {
         return self + seconds
     }
