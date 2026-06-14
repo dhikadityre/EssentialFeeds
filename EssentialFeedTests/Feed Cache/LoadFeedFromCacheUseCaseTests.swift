@@ -145,14 +145,14 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
         })
     }
     
-    /// system melakukan delete cache ketika error terjadi
-    func test_load_deleteCachesOnRetrievalError() {
+    /// system tidak memberikan side efffect - pada saat - retrieve error
+    func test_load_hasNoSideEffectOnRetrievalError() {
         let (sut, store) = makeSUT()
         
         sut.load { _ in }
         store.completeRetrieval(with: anyNSError())
         
-        XCTAssertEqual(store.receivedMessage, [.retrieve, .deleteCachedFeed])
+        XCTAssertEqual(store.receivedMessage, [.retrieve])
     }
     
     /// system melakukan tidak men-delete cache ketika empty/kosong
