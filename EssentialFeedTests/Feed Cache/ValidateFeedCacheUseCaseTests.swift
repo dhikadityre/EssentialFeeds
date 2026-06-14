@@ -78,7 +78,7 @@ class ValidateFeedCacheUseCaseTests: XCTestCase {
     }
     
     /// system tidak mendelete cache jika lebih dari seminggu
-    func test_load_deleteOnMoreThanSevenDaysOldCache() {
+    func test_validateCache_deleteOnMoreThanSevenDaysOldCache() {
         let feed = uniqueImageFeed()
         let fixedCurrentDate = Date()
         let sevenOldTimestamp = fixedCurrentDate
@@ -91,6 +91,21 @@ class ValidateFeedCacheUseCaseTests: XCTestCase {
         store.completeRetrieval(with: feed.local, timestamp: sevenOldTimestamp)
         
         XCTAssertEqual(store.receivedMessage, [.retrieve, .deleteCachedFeed])
+    }
+    
+    func test_validateCache_doesNotDeleteCacheAfterSUTInstanceHasBeenDealocated() {
+        let store = FeedStoreSpy()
+        var localFeedLoader: LocalFeedLoader? = LocalFeedLoader(
+            store: store,
+            currentDate: Date.init
+        )
+        
+        localFeedLoader?.validateCache()
+        localFeedLoader = nil
+        
+        store.completeRetrieval(with: anyNSError())
+        
+        XCTAssertEqual(store.receivedMessage, [.retrieve])
     }
     
     // MARK: - Helper
