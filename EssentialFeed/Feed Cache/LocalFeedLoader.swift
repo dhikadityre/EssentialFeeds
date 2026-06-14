@@ -12,8 +12,8 @@ public final class LocalFeedLoader {
     private let currentDate: () -> Date
     private let calendar = Calendar(identifier: .gregorian)
     
-    public typealias SaveResult = Error?
-    public typealias RetrieveResult = LoadFeedResult
+//    public typealias SaveResult = Error?
+//    public typealias RetrieveResult = LoadFeedResult
     
     public init(store: FeedStore, currentDate: @escaping () -> Date) {
         self.store = store
@@ -33,6 +33,8 @@ public final class LocalFeedLoader {
 }
 
 extension LocalFeedLoader {
+    public typealias SaveResult = Error?
+    
     public func save(_ feed: [FeedImage], completion: @escaping (SaveResult) -> Void) {
         /// Disini kita dapat menjalankan secara sync atau biarkan framework menjalankan secara async
         /// yang pasti adalah `deleteCachedFeed` harus dijalankan terlebih dahulu
@@ -61,6 +63,8 @@ extension LocalFeedLoader {
 }
    
 extension LocalFeedLoader: FeedLoader {
+    public typealias RetrieveResult = LoadFeedResult
+    
     public func load(completion: @escaping (RetrieveResult) -> Void) {
         store.retrieve { [weak self] result in
             guard let self else { return }
