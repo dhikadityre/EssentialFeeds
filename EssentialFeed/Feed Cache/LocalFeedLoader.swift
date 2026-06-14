@@ -44,7 +44,7 @@ public final class LocalFeedLoader {
             case let .found(feed, timestamp) where validate(timestamp):
                 completion(.success(feed.toModels()))
             case .found:                
-                store.deleteCachedFeed { _ in }
+                // store.deleteCachedFeed { _ in }
                 completion(.success([]))
             case .empty:
                 completion(.success([]))
@@ -60,8 +60,13 @@ public final class LocalFeedLoader {
             switch result {
             case .failure:
                 store.deleteCachedFeed { _ in }
-            default:
-                break
+            
+            /// Jika retrieve berhasil menemukan cache, tetapi timestamp-nya `tidak lagi` valid (sudah lebih dari 7 hari), hapus cache tersebut dari store.
+            case let .found(_, timestamp) where !self.validate(timestamp):
+                store.deleteCachedFeed { _ in }
+            
+            /// kenapa tidak membuat `default`? ini untuk menjaga kualitas unit test dan mengingatkan kita jika sebuah case gagal akan kesini alih2 membuatnya default.
+            case .empty, .found: break
             }
         }
     }

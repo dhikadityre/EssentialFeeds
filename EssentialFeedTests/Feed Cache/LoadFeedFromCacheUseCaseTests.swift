@@ -182,7 +182,7 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
     }
     
     /// system tidak mendelete cache saat berumur seminggu
-    func test_load_deleteCacheOnSevenDaysOldCache() {
+    func test_load_hasNoSideEffectOnSevenDaysOldCache() {
         let feed = uniqueImageFeed()
         let fixedCurrentDate = Date()
         let sevenOldTimestamp = fixedCurrentDate
@@ -193,11 +193,11 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
         sut.load { _ in }
         store.completeRetrieval(with: feed.local, timestamp: sevenOldTimestamp)
         
-        XCTAssertEqual(store.receivedMessage, [.retrieve, .deleteCachedFeed])
+        XCTAssertEqual(store.receivedMessage, [.retrieve])
     }
     
     /// system tidak mendelete cache jika lebih dari seminggu
-    func test_load_deleteCacheOnMoreThanSevenDaysOldCache() {
+    func test_load_hasNoSideEffectOnMoreThanSevenDaysOldCache() {
         let feed = uniqueImageFeed()
         let fixedCurrentDate = Date()
         let sevenOldTimestamp = fixedCurrentDate
@@ -209,7 +209,7 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
         sut.load { _ in }
         store.completeRetrieval(with: feed.local, timestamp: sevenOldTimestamp)
         
-        XCTAssertEqual(store.receivedMessage, [.retrieve, .deleteCachedFeed])
+        XCTAssertEqual(store.receivedMessage, [.retrieve])
     }
     
     /// memastikan Result tidak di trigger saat instance sudah di dealocated
