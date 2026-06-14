@@ -166,7 +166,7 @@ final class LoadFeedFromCacheUseCaseTests: XCTestCase {
     }
     
     /// system tidak mendelete cache jika kurang dari seminggu
-    func test_load_doesNotDeleteCacheOnLessThanSevenDaysOldCache() {
+    func test_load_hasNoSideEffectOnLessThanSevenDaysOldCache() {
         let (sut, store) = makeSUT()
         
         let feed = uniqueImageFeed()
