@@ -78,13 +78,13 @@ class CodableFeedStoreTests: XCTestCase {
     override func setUp() {
         super.setUp()
         
-        try? FileManager.default.removeItem(at: storeURL())
+        try? FileManager.default.removeItem(at: testSpesificStoreURL())
     }
     
     override func tearDown() {
         super.tearDown()
         
-        try? FileManager.default.removeItem(at: storeURL())
+        try? FileManager.default.removeItem(at: testSpesificStoreURL())
     }
     
     func test_retrieve_deliversEmptyOnEmptyCache() {
@@ -161,11 +161,21 @@ class CodableFeedStoreTests: XCTestCase {
         return sut
     }
     
-    private func storeURL() -> URL {
+    private func testSpesificStoreURL() -> URL {
         FileManager.default.urls(
             for: .documentDirectory,
             in: .userDomainMask
         ).first!.appendingPathComponent("image-feed.store")
+        /*
+        FileManager.default.urls(
+//             for: .documentDirectory,
+            for: .cachesDirectory,
+            in: .userDomainMask
+        )
+        .first!.appendingPathComponent("\(type(of: self)).store") /// dengan  type-of-self, kita mendapatkan nama store yg kita inginkan, yaitu sessuai dgn naming class.
+        // .first!.appendingPathComponent("image-feed.store") /// ketika melakukan ini, ada potensi url kita digunakan di tempat lain padahal kita hanya menggunakannya untuk sepesifik kebutuhan test di `CodableFeedStoreTests`.
+        // .first!.appendingPathComponent("CodableFeedStoreTests.store") /// membutanya seperti ini masih tidak relevan karena bisa saja nama class di refactor dan kita melwati proses pergantian nama.
+         */
     }
 }
 
