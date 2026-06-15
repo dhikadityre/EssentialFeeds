@@ -234,21 +234,23 @@ class CodableFeedStoreTests: XCTestCase {
     /// Retrieve - Error (if possible to simulate, e.g., invalid data)
     /// To Retrive an Error, we can just add some `invalid data` to the `storeURL` then try to `retrieve` our `models`.
     func test_retrieve_deliversFailureOnRetrievalError() {
-        let sut = makeSUT()
+        // GIVEN
+        let storeURL = testSpesificStoreURL()
+        let sut = makeSUT(storeURL: storeURL)
         
-        try! "invalid data".write(to: testSpesificStoreURL(), atomically: false, encoding: .utf8)
+        // WHEN
+        try! "invalid data".write(to: storeURL, atomically: false, encoding: .utf8)
         
+        // THEN
         expect(sut, toRetrieve: .failure(anyNSError()))
     }
     
     // MARK: - Helper
-    private func makeSUT(file: StaticString = #file, line: UInt = #line) -> CodableFeedStore {
-        let storeURL = FileManager.default.urls(
-            for: .documentDirectory,
-            in: .userDomainMask
-        ).first!.appendingPathComponent("image-feed.store")
-        
-        let sut = CodableFeedStore(storeURL: storeURL)
+    private func makeSUT(
+        storeURL: URL? = nil,
+        file: StaticString = #file, line: UInt = #line
+    ) -> CodableFeedStore {
+        let sut = CodableFeedStore(storeURL: storeURL ??  testSpesificStoreURL())
         trackForMemoryLeaks(sut, file: file, line: line)
         return sut
     }
@@ -310,11 +312,6 @@ class CodableFeedStoreTests: XCTestCase {
     
     private func testSpesificStoreURL() -> URL {
         FileManager.default.urls(
-            for: .documentDirectory,
-            in: .userDomainMask
-        ).first!.appendingPathComponent("image-feed.store")
-        /*
-        FileManager.default.urls(
 //             for: .documentDirectory,
             for: .cachesDirectory,
             in: .userDomainMask
@@ -322,7 +319,6 @@ class CodableFeedStoreTests: XCTestCase {
         .first!.appendingPathComponent("\(type(of: self)).store") /// dengan  type-of-self, kita mendapatkan nama store yg kita inginkan, yaitu sessuai dgn naming class.
         // .first!.appendingPathComponent("image-feed.store") /// ketika melakukan ini, ada potensi url kita digunakan di tempat lain padahal kita hanya menggunakannya untuk sepesifik kebutuhan test di `CodableFeedStoreTests`.
         // .first!.appendingPathComponent("CodableFeedStoreTests.store") /// membutanya seperti ini masih tidak relevan karena bisa saja nama class di refactor dan kita melwati proses pergantian nama.
-         */
     }
 }
 
