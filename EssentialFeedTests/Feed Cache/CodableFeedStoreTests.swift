@@ -52,9 +52,13 @@ class CodableFeedStore {
             guard let data = try? Data(contentsOf: self.storeURL) else {
                 return completion(.empty)
             }
-            let decoder = JSONDecoder()
-            let cache = try! decoder.decode(Cache.self, from: data)
-            completion(.found(feed: cache.localFeed, timestamp: cache.timestamp))
+            do {
+                let decoder = JSONDecoder()
+                let cache = try decoder.decode(Cache.self, from: data)
+                completion(.found(feed: cache.localFeed, timestamp: cache.timestamp))
+            } catch {
+                completion(.failure(error))
+            }
         }
     }
     
@@ -140,7 +144,8 @@ class CodableFeedStoreTests: XCTestCase {
     
     /// Insert - To empty cache works (to empty cache stores data)
     /// Retrieve - Empty cache twice returns empty (no side effects)
-    func test_retrieveAfterInsertingToEmptyCache_deliversInsertedValues() {
+    // func test_retrieveAfterInsertingToEmptyCache_deliversInsertedValues() {
+    func test_retrieve_deliversFoundValueOnNonEmptyCache() {
         // GIVEN
         let sut = makeSUT()
         let feed = uniqueImageFeed().local
@@ -226,6 +231,16 @@ class CodableFeedStoreTests: XCTestCase {
         expect(sut, toRetrieveTwice: .found(feed: feed, timestamp: timestamp))
     }
     
+    /// Retrieve - Error (if possible to simulate, e.g., invalid data)
+    /// To Retrive an Error, we can just add some `invalid data` to the `storeURL` then try to `retrieve` our `models`.
+    func test_retrieve_deliversFailureOnRetrievalError() {
+        let sut = makeSUT()
+        
+        try! "invalid data".write(to: testSpesificStoreURL(), atomically: false, encoding: .utf8)
+        
+        expect(sut, toRetrieve: .failure(anyNSError()))
+    }
+    
     // MARK: - Helper
     private func makeSUT(file: StaticString = #file, line: UInt = #line) -> CodableFeedStore {
         let storeURL = FileManager.default.urls(
@@ -255,7 +270,8 @@ class CodableFeedStoreTests: XCTestCase {
         
         sut.retrieve { retrievedResult in
             switch (expectedResult, retrievedResult) {
-            case (.empty, .empty):
+            case (.empty, .empty),
+                 (.failure, .failure):
                 break
                 
             case let (.found(expected), .found(retrieved)):
