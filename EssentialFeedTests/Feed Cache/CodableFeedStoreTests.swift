@@ -10,8 +10,35 @@ import EssentialFeed
 
 class CodableFeedStore {
     private struct Cache: Codable {
-        let feed: [LocalFeedImage]
+        let feed: [CodableFeedImage]
         let timestamp: Date
+        
+        var localFeed: [LocalFeedImage] {
+            return feed.map { $0.local }
+        }
+    }
+    
+    private struct CodableFeedImage: Codable {
+        private let id: UUID
+        private let description: String?
+        private let location: String?
+        private let url: URL
+        
+        init(_ localFeedImage: LocalFeedImage) {
+            self.id = localFeedImage.id
+            self.description = localFeedImage.description
+            self.location = localFeedImage.location
+            self.url = localFeedImage.url
+        }
+        
+        var local: LocalFeedImage {
+            LocalFeedImage(
+                id: id,
+                description: description,
+                location: location,
+                url: url
+            )
+        }
     }
     
     private let storeURL = FileManager.default.urls(
@@ -26,7 +53,7 @@ class CodableFeedStore {
             }
             let decoder = JSONDecoder()
             let cache = try! decoder.decode(Cache.self, from: data)
-            completion(.found(feed: cache.feed, timestamp: cache.timestamp))
+            completion(.found(feed: cache.localFeed, timestamp: cache.timestamp))
         }
     }
     
@@ -38,9 +65,8 @@ class CodableFeedStore {
         /// Menggunakan encoder dan menyelesaikan completion secara async
         DispatchQueue.global().async {
             let encoder = JSONEncoder()
-            let encoded = try! encoder.encode(
-                Cache(feed: feed, timestamp: timestamp)
-            )
+            let cache = Cache(feed: feed.map(CodableFeedImage.init), timestamp: timestamp)
+            let encoded = try! encoder.encode(cache)
             try! encoded.write(to: self.storeURL)
             completion(nil)
         }
