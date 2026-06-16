@@ -93,15 +93,15 @@ class CodableFeedStore {
     
     func deleteCachedFeed(completion: @escaping FeedStore.DeletionCompletion) {
         // completion(nil)
+        guard FileManager.default.fileExists(atPath: storeURL.path) else {
+            return completion(nil)
+        }
         
-        DispatchQueue.global().async { [weak self] in
-            guard let self else { return }
-            guard FileManager.default.fileExists(atPath: storeURL.path) else {
-                return completion(nil)
-            }
-            
-            try! FileManager.default.removeItem(at: storeURL)
+        do {
+            try FileManager.default.removeItem(at: storeURL)
             completion(nil)
+        } catch {
+            completion(error)
         }
     }
 }
@@ -354,6 +354,17 @@ class CodableFeedStoreTests: XCTestCase {
         expect(sut, toRetrieve: .empty)
     }
     
+    /// Delete-Error (if possible to simulate, e.g., no write permission)
+    func test_delete_deliversErrorOnDeletionError() {
+        let noDeletePermissionURL = cachesDirectory()
+        let sut = makeSUT(storeURL: noDeletePermissionURL)
+        
+        let deletionError = deleteCache(from: sut)
+        
+        XCTAssertNotNil(deletionError, "Expected cache deletion to fail")
+        expect(sut, toRetrieve: .empty)
+    }
+    
     // MARK: - Helper
     private func makeSUT(
         storeURL: URL? = nil,
@@ -439,14 +450,21 @@ class CodableFeedStoreTests: XCTestCase {
     }
     
     private func testSpesificStoreURL() -> URL {
+        /*
         FileManager.default.urls(
-//             for: .documentDirectory,
+            // for: .documentDirectory,
             for: .cachesDirectory,
             in: .userDomainMask
         )
         .first!.appendingPathComponent("\(type(of: self)).store") /// dengan  type-of-self, kita mendapatkan nama store yg kita inginkan, yaitu sessuai dgn naming class.
         // .first!.appendingPathComponent("image-feed.store") /// ketika melakukan ini, ada potensi url kita digunakan di tempat lain padahal kita hanya menggunakannya untuk sepesifik kebutuhan test di `CodableFeedStoreTests`.
         // .first!.appendingPathComponent("CodableFeedStoreTests.store") /// membutanya seperti ini masih tidak relevan karena bisa saja nama class di refactor dan kita melwati proses pergantian nama.
+        */
+        return cachesDirectory().appendingPathComponent("\(type(of: self)).store")
+    }
+    
+    private func cachesDirectory() -> URL {
+        return FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!
     }
 }
 
