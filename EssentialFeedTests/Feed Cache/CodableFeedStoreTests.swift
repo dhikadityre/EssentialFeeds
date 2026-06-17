@@ -48,7 +48,7 @@ class CodableFeedStore: FeedStore {
     }
     
     func retrieve(completion: @escaping (RetrieveCompletion)) {
-        DispatchQueue.global().async {
+//        DispatchQueue.global().async {
             guard let data = try? Data(contentsOf: self.storeURL) else {
                 return completion(.empty)
             }
@@ -59,7 +59,7 @@ class CodableFeedStore: FeedStore {
             } catch {
                 completion(.failure(error))
             }
-        }
+//        }
     }
     
     func insert(
@@ -78,7 +78,7 @@ class CodableFeedStore: FeedStore {
         }
         */
          
-        DispatchQueue.global().async {
+//        DispatchQueue.global().async {
             do {
                 let encoder = JSONEncoder()
                 let cache = Cache(feed: feed.map(CodableFeedImage.init), timestamp: timestamp)
@@ -88,7 +88,7 @@ class CodableFeedStore: FeedStore {
             } catch {
                 completion(error)
             }
-        }
+//        }
     }
     
     func deleteCachedFeed(completion: @escaping FeedStore.DeletionCompletion) {
@@ -363,6 +363,35 @@ class CodableFeedStoreTests: XCTestCase {
         
         XCTAssertNotNil(deletionError, "Expected cache deletion to fail")
         expect(sut, toRetrieve: .empty)
+    }
+    
+    ///Expect running in order or serially
+    func test_storeSideEffects_runSerially() {
+        let sut = makeSUT()
+        var completedOperationsInOrder = [XCTestExpectation]()
+        
+        let op1 = expectation(description: "Operation 1")
+        sut.insert(uniqueImageFeed().local, timestamp: Date()) { _ in
+            completedOperationsInOrder.append(op1)
+            op1.fulfill()
+        }
+        
+        // Run Side Effect Delete
+        let op2 = expectation(description: "Operation 2")
+        sut.deleteCachedFeed { _ in
+            completedOperationsInOrder.append(op2)
+            op2.fulfill()
+        }
+        
+        let op3 = expectation(description: "Operation 3")
+        sut.insert(uniqueImageFeed().local, timestamp: Date()) { _ in
+            completedOperationsInOrder.append(op3)
+            op3.fulfill()
+        }
+        
+        waitForExpectations(timeout: 5.0)
+        
+        XCTAssertEqual(completedOperationsInOrder, [op1, op2, op3], "Expected side-effects to run serially but operations finished in the wrong order")
     }
     
     // MARK: - Helper
