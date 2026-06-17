@@ -8,43 +8,6 @@
 import XCTest
 import EssentialFeed
 
-//internal protocol FeedStoreSpecs {
-//    internal func test_retrieve_deliversEmptyOnEmptyCache()
-//
-//    internal func test_retrieve_hasNoSideEffectOnEmptyCache()
-//
-//    /// Insert - To empty cache works (to empty cache stores data)
-//    /// Retrieve - Empty cache twice returns empty (no side effects)
-//    internal func test_retrieve_deliversFoundValueOnNonEmptyCache()
-//
-//    /// Non-empty cache twice returns same data (retrieve should have no side-effects)
-//    internal func test_retrieve_hasNoSideEffectOnNonEmptyCache()
-//
-//    /// Retrieve - Error (if possible to simulate, e.g., invalid data)
-//    /// To Retrive an Error, we can just add some `invalid data` to the `storeURL` then try to `retrieve` our `models`.
-//    internal func test_retrieve_deliversFailureOnRetrievalError()
-//
-//    internal func test_retrieve_hasNoSideEffectsOnFailure()
-//
-//    /// Insert - To non-empty cache overrides previous value
-//    internal func test_insert_overridesPreviouslyInsertedCacheValues()
-//
-//    /// Insert - Error (if possible to simulate, e.g., no write permission)
-//    internal func test_insert_deliversErrorOnInsertionError()
-//
-//    /// Delete - Empty cache does nothing (cache stays empty and does not fail)
-//    internal func test_delete_hasNoSideEffectsOnEmptyCache()
-//
-//    /// Delete-Inserted data leaves cache empty
-//    internal func test_delete_emptiesPreviouslyInsertedCache()
-//
-//    /// Delete-Error (if possible to simulate, e.g., no write permission)
-//    internal func test_delete_deliversErrorOnDeletionError()
-//
-//    ///Expect running in order or serially
-//    internal func test_storeSideEffects_runSerially()
-//}
-
 class CodableFeedStore: FeedStore {
     private struct Cache: Codable {
         let feed: [CodableFeedImage]
@@ -153,7 +116,9 @@ class CodableFeedStore: FeedStore {
     }
 }
 
-class CodableFeedStoreTests: XCTestCase {
+typealias FailableFeedStoreSpecs = FailableRetrieveFeedStoreSpecs & FailableInsertFeedStoreSpecs & FailableDeleteFeedStoreSpecs
+
+class CodableFeedStoreTests: XCTestCase, FailableFeedStoreSpecs {
     override func setUp() {
         super.setUp()
         
