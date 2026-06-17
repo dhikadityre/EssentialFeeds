@@ -42,14 +42,20 @@ class CodableFeedStore: FeedStore {
     }
     
     private let storeURL: URL
+    private let queue = DispatchQueue(
+        label: "\(CodableFeedStore.self) Queue",
+        qos: .userInitiated
+    )
     
     init(storeURL: URL) {
         self.storeURL = storeURL
     }
     
     func retrieve(completion: @escaping (RetrieveCompletion)) {
-//        DispatchQueue.global().async {
-            guard let data = try? Data(contentsOf: self.storeURL) else {
+        let storeURL = self.storeURL // Menyimpan copy of value storeURL
+        queue.async {
+            // guard let data = try? Data(contentsOf: self.storeURL) else {
+            guard let data = try? Data(contentsOf: storeURL) else { // Melakukan passing value `storeURL` alih2 reference `self`
                 return completion(.empty)
             }
             do {
@@ -59,7 +65,7 @@ class CodableFeedStore: FeedStore {
             } catch {
                 completion(.failure(error))
             }
-//        }
+        }
     }
     
     func insert(
@@ -78,7 +84,7 @@ class CodableFeedStore: FeedStore {
         }
         */
          
-//        DispatchQueue.global().async {
+        queue.async {
             do {
                 let encoder = JSONEncoder()
                 let cache = Cache(feed: feed.map(CodableFeedImage.init), timestamp: timestamp)
@@ -88,20 +94,23 @@ class CodableFeedStore: FeedStore {
             } catch {
                 completion(error)
             }
-//        }
+        }
     }
     
     func deleteCachedFeed(completion: @escaping FeedStore.DeletionCompletion) {
         // completion(nil)
-        guard FileManager.default.fileExists(atPath: storeURL.path) else {
-            return completion(nil)
-        }
-        
-        do {
-            try FileManager.default.removeItem(at: storeURL)
-            completion(nil)
-        } catch {
-            completion(error)
+        let storeURL = self.storeURL
+        queue.async {
+            guard FileManager.default.fileExists(atPath: storeURL.path) else {
+                return completion(nil)
+            }
+            
+            do {
+                try FileManager.default.removeItem(at: storeURL)
+                completion(nil)
+            } catch {
+                completion(error)
+            }
         }
     }
 }
