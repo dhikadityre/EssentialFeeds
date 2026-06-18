@@ -191,6 +191,8 @@ class CodableFeedStoreTests: XCTestCase, FailableFeedStoreSpecs {
     func test_retrieve_deliversFoundValueOnNonEmptyCache() {
         // GIVEN
         let sut = makeSUT()
+        
+        /*
         let feed = uniqueImageFeed().local
         let timestamp = Date()
         
@@ -223,6 +225,8 @@ class CodableFeedStoreTests: XCTestCase, FailableFeedStoreSpecs {
         
         // THEN
         expect(sut, toRetrieve: .found(feed: feed, timestamp: timestamp))
+        */
+        assertThatRetrieveDeliversFoundValuesOnNonEmptyCache(on: sut)
     }
     
     /// Non-empty cache twice returns same data (retrieve should have no side-effects)
