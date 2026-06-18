@@ -179,8 +179,9 @@ class CodableFeedStoreTests: XCTestCase, FailableFeedStoreSpecs {
         expect(sut, toRetrieve: .empty)
         expect(sut, toRetrieve: .empty)
         */
-        expect(sut, toRetrieveTwice: .empty)
         
+        // expect(sut, toRetrieveTwice: .empty)
+        assertThatRetrieveHasNoSideEffectsOnEmptyCache(on: sut)
     }
     
     
@@ -228,6 +229,8 @@ class CodableFeedStoreTests: XCTestCase, FailableFeedStoreSpecs {
     func test_retrieve_hasNoSideEffectOnNonEmptyCache() {
         // GIVEN
         let sut = makeSUT()
+        assertThatRetrieveHasNoSideEffectsOnNonEmptyCache(on: sut)
+        /*
         let feed = uniqueImageFeed().local
         let timestamp = Date()
         
@@ -271,6 +274,7 @@ class CodableFeedStoreTests: XCTestCase, FailableFeedStoreSpecs {
         
         // THEN
         expect(sut, toRetrieveTwice: .found(feed: feed, timestamp: timestamp))
+        */
     }
     
     /// Retrieve - Error (if possible to simulate, e.g., invalid data)

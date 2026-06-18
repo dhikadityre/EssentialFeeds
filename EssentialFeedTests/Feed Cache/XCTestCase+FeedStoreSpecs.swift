@@ -20,6 +20,24 @@ extension FeedStoreSpecs where Self: XCTestCase {
         expect(sut, toRetrieve: .empty, file: file, line: line)
     }
     
+    func assertThatRetrieveHasNoSideEffectsOnEmptyCache(
+        on sut: FeedStore,
+        file: StaticString = #file, line: UInt = #line
+    ) {
+        expect(sut, toRetrieveTwice: .empty)
+    }
+    
+    func assertThatRetrieveHasNoSideEffectsOnNonEmptyCache(
+        on sut: FeedStore,
+        file: StaticString = #file, line: UInt = #line
+    ) {
+        let feed = uniqueImageFeed().local
+        let timestamp = Date()
+        
+        insert((feed, timestamp: timestamp), to: sut)
+        expect(sut, toRetrieveTwice: .found(feed: feed, timestamp: timestamp))
+    }
+    
     func assertThatRetrieveDeliversFailureOnRetrievalError(
         on sut: FeedStore,
         file: StaticString = #file, line: UInt = #line
