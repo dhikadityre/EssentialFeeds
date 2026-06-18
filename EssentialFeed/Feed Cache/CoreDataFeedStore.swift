@@ -47,8 +47,9 @@ public final class CoreDataFeedStore: FeedStore {
     /// - Persistent container harus berhasil dimuat saat inisialisasi store.
     public func retrieve(completion: @escaping RetrieveCompletion) {
         // completion(.empty)
-        let context = self.context
-        context.perform {
+//        let context = self.context
+//        context.perform {
+        perform { context in
             do {
                 /*
                 let request = NSFetchRequest<ManagedCache>(entityName: ManagedCache.entity().name!)
@@ -100,8 +101,9 @@ public final class CoreDataFeedStore: FeedStore {
     ///   - timestamp: Tanggal yang terkait dengan feed untuk keperluan validasi usia cache.
     ///   - completion: Closure yang dipanggil saat operasi selesai, `nil` jika sukses atau `Error` jika gagal.
     public func insert(_ feed: [EssentialFeed.LocalFeedImage], timestamp: Date, completion: @escaping InsertionCompletion) {
-        let context = self.context
-        context.perform {
+//        let context = self.context
+//        context.perform {
+        perform { context in
             do {
                 // let managedCache = ManagedCache(context: context)
                 let managedCache = try ManagedCache.newUniqueInstance(in: context)
@@ -128,8 +130,9 @@ public final class CoreDataFeedStore: FeedStore {
     
     public func deleteCachedFeed(completion: @escaping DeletionCompletion) {
         // completion(nil)
-        let context = self.context
-        context.perform {
+//        let context = self.context
+//        context.perform {
+        perform { context in
             do {
                 try ManagedCache.find(in: context)
                     .map(context.delete)
@@ -139,6 +142,11 @@ public final class CoreDataFeedStore: FeedStore {
                 completion(error)
             }
         }
+    }
+    
+    private func perform(_ action: @escaping (NSManagedObjectContext) -> Void) {
+        let context = self.context
+        context.perform { action(context) }
     }
 }
 
