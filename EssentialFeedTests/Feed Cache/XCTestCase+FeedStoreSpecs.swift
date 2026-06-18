@@ -82,6 +82,12 @@ extension FeedStoreSpecs where Self: XCTestCase {
         expect(sut, toRetrieve: .empty, file: file, line: line)
     }
     
+    func assertThatInsertDeliversNoErrorOnEmptyCache(on sut: FeedStore, file: StaticString = #filePath, line: UInt = #line) {
+        let insertionError = insert((uniqueImageFeed().local, Date()), to: sut)
+
+        XCTAssertNil(insertionError, "Expected to insert cache successfully", file: file, line: line)
+    }
+    
     func assertThatDeleteDeliversErrorOnDeletionError(on sut: FeedStore, file: StaticString = #file, line: UInt = #line) {
         let deletionError = deleteCache(from: sut)
         

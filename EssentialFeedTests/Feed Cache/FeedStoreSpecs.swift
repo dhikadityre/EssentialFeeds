@@ -36,8 +36,12 @@ internal protocol FeedStoreSpecs {
     /// Tadinya digabung
     func test_insert_hasNoSideEffectsOnInsertionError()
     */
-
+    
+    func test_insert_deliversNoErrorOnEmptyCache()
+    func test_insert_deliversNoErrorOnNonEmptyCache()
+    func test_insert_overridesPreviouslyInsertedCacheValues()
     func test_delete_deliversNoErrorOnEmptyCache()
+    func test_delete_hasNoSideEffectsOnEmptyCache()
 
     func test_delete_deliversNoErrorOnNonEmptyCache()
 
