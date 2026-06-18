@@ -151,7 +151,8 @@ class CodableFeedStoreTests: XCTestCase, FailableFeedStoreSpecs {
          */
         
         // THEN
-        expect(sut, toRetrieve: .empty)
+        // expect(sut, toRetrieve: .empty)
+        assertThatRetrieveDeliversEmptyOnEmptyCache(on: sut)
     }
     
     func test_retrieve_hasNoSideEffectOnEmptyCache() {
@@ -179,6 +180,7 @@ class CodableFeedStoreTests: XCTestCase, FailableFeedStoreSpecs {
         expect(sut, toRetrieve: .empty)
         */
         expect(sut, toRetrieveTwice: .empty)
+        
     }
     
     
@@ -282,7 +284,8 @@ class CodableFeedStoreTests: XCTestCase, FailableFeedStoreSpecs {
         try! "invalid data".write(to: storeURL, atomically: false, encoding: .utf8)
         
         // THEN
-        expect(sut, toRetrieve: .failure(anyNSError()))
+        // expect(sut, toRetrieve: .failure(anyNSError()))
+        assertThatRetrieveDeliversFailureOnRetrievalError(on: sut)
     }
     
     func test_retrieve_hasNoSideEffectsOnFailure() {
@@ -294,7 +297,8 @@ class CodableFeedStoreTests: XCTestCase, FailableFeedStoreSpecs {
         try! "invalid data".write(to: storeURL, atomically: false, encoding: .utf8)
         
         // THEN
-        expect(sut, toRetrieveTwice: .failure(anyNSError()))
+        // expect(sut, toRetrieveTwice: .failure(anyNSError()))
+        assertThatRetrieveHasNoSideEffectsOnFailure(on: sut)
     }
     
     
@@ -319,6 +323,8 @@ class CodableFeedStoreTests: XCTestCase, FailableFeedStoreSpecs {
     func test_insert_deliversErrorOnInsertionError() {
         let invalidStoreURL = URL(string: "invalid://store-url")!
         let sut = makeSUT(storeURL: invalidStoreURL)
+        
+        /*
         let feed = uniqueImageFeed().local
         let timestamp = Date()
         
@@ -326,6 +332,9 @@ class CodableFeedStoreTests: XCTestCase, FailableFeedStoreSpecs {
         
         XCTAssertNotNil(insertionError, "Expected cache insertion to fail with an error")
         expect(sut, toRetrieve: .empty)
+        */
+        
+        assertThatInsertDeliversErrorOnInsertionError(on: sut)
     }
     
     /*
@@ -352,12 +361,17 @@ class CodableFeedStoreTests: XCTestCase, FailableFeedStoreSpecs {
     func test_insert_hasNoSideEffectsOnInsertionError() {
         let invalidStoreURL = URL(string: "invalid://store-url")!
         let sut = makeSUT(storeURL: invalidStoreURL)
+        
+        /*
         let feed = uniqueImageFeed().local
         let timestamp = Date()
         
         insert((feed, timestamp), to: sut)
         
         expect(sut, toRetrieve: .empty)
+        */
+        
+        assertThatInsertHasNoSideEffectsOnInsertionError(on: sut)
     }
     
     func test_delete_deliversNoErrorOnEmptyCache() {
@@ -414,19 +428,26 @@ class CodableFeedStoreTests: XCTestCase, FailableFeedStoreSpecs {
         let noDeletePermissionURL = cachesDirectory()
         let sut = makeSUT(storeURL: noDeletePermissionURL)
         
+        /*
         let deletionError = deleteCache(from: sut)
         
         XCTAssertNotNil(deletionError, "Expected cache deletion to fail")
         // expect(sut, toRetrieve: .empty)
+        */
+        
+        assertThatDeleteDeliversErrorOnDeletionError(on: sut)
     }
     
     func test_delete_hasNoSideEffectsOnDeletionError() {
         let noDeletePermissionURL = cachesDirectory()
         let sut = makeSUT(storeURL: noDeletePermissionURL)
         
+        /*
         deleteCache(from: sut)
         
         expect(sut, toRetrieve: .empty)
+        */
+        assertThatDeleteHasNoSideEffectsOnDeletionError(on: sut)
     }
     
     ///Expect running in order or serially
