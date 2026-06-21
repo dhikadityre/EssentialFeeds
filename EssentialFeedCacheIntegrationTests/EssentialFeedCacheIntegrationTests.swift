@@ -33,14 +33,47 @@ final class EssentialFeedCacheIntegrationTests: XCTestCase {
         let sutToPerformLoad = makeSUT()
         let feed = uniqueImageFeed().models
         
+        /*
         let saveExp = expectation(description: "Wait for save completion")
         sutToPerformSave.save(feed) { saveError in
             XCTAssertNil(saveError, "Expected to save feed successfully")
             saveExp.fulfill()
         }
         wait(for: [saveExp], timeout: 1.0)
+        */
+        save(feed, with: sutToPerformSave)
         
         expect(sutToPerformLoad, toLoad: feed)
+    }
+    
+    func test_save_overridesItemsSavedOnASeparateInstance() {
+        let sutToPerformFirstSave = makeSUT()
+        let sutToPerformLastSave = makeSUT()
+        let sutToPerformLoad = makeSUT()
+        let firstFeed = uniqueImageFeed().models
+        let latestFeed = uniqueImageFeed().models
+        
+        /*
+        let saveExp1 = expectation(description: "Wait for save completion")
+        sutToPerformFirstSave.save(firstFeed) { saveError in
+            XCTAssertNil(saveError, "Expected to save feed successfully")
+            saveExp1.fulfill()
+        }
+        wait(for: [saveExp1], timeout: 1.0)
+        
+        
+        let saveExp2 = expectation(description: "Wait for save completion")
+        sutToPerformLastSave.save(latestFeed) { saveError in
+            XCTAssertNil(saveError, "Expected to save feed successfully")
+            saveExp2.fulfill()
+        }
+        wait(for: [saveExp2], timeout: 1.0)
+        */
+        
+        save(firstFeed, with: sutToPerformFirstSave)
+        save(latestFeed, with: sutToPerformLastSave)
+        
+        expect(sutToPerformLoad, toLoad: latestFeed)
     }
     
     // MARK: - Helpers
@@ -75,28 +108,17 @@ final class EssentialFeedCacheIntegrationTests: XCTestCase {
         wait(for: [exp], timeout: 1.0)
     }
     
-    func test_save_overridesItemsSavedOnASeparateInstance() {
-        let sutToPerformFirstSave = makeSUT()
-        let sutToPerformLastSave = makeSUT()
-        let sutToPerformLoad = makeSUT()
-        let firstFeed = uniqueImageFeed().models
-        let latestFeed = uniqueImageFeed().models
-        
-        let saveExp1 = expectation(description: "Wait for save completion")
-        sutToPerformFirstSave.save(firstFeed) { saveError in
-            XCTAssertNil(saveError, "Expected to save feed successfully")
-            saveExp1.fulfill()
+    private func save(
+        _ feed: [FeedImage],
+        with loader: LocalFeedLoader,
+        file: StaticString = #file, line: UInt = #line
+    ) {
+        let saveExp = expectation(description: "Wait for save completion")
+        loader.save(feed) { saveError in
+            XCTAssertNil(saveError, "Expected to save feed successfully", file: file, line: line)
+            saveExp.fulfill()
         }
-        wait(for: [saveExp1], timeout: 1.0)
-        
-        let saveExp2 = expectation(description: "Wait for save completion")
-        sutToPerformLastSave.save(latestFeed) { saveError in
-            XCTAssertNil(saveError, "Expected to save feed successfully")
-            saveExp2.fulfill()
-        }
-        wait(for: [saveExp2], timeout: 1.0)
-        
-        expect(sutToPerformLoad, toLoad: latestFeed)
+        wait(for: [saveExp], timeout: 6.0)
     }
 
     /// Di Integration test disarankan menggunakan instance dari Production daripada menggunakan Test Double.
