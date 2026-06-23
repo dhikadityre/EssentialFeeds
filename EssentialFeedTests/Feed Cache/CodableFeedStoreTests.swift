@@ -336,7 +336,7 @@ class CodableFeedStoreTests: XCTestCase, FailableFeedStoreSpecs {
         
         deleteCache(from: sut)
         
-        expect(sut, toRetrieve: .empty)
+        expect(sut, toRetrieve: .success(.empty))
     }
     
     /// Delete-Error (if possible to simulate, e.g., no write permission)

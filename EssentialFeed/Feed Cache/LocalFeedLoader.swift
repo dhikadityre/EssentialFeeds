@@ -57,7 +57,7 @@ extension LocalFeedLoader: FeedLoader {
             switch result {
                 /// case .found(feed: let localFeedImage, timestamp: let timestamp):
                 /// completion(.success(localFeedImage.toModels()))
-            case let .found(feed, timestamp) where FeedCachePolicy.validate(timestamp, against: currentDate()):
+            case let .success(.found(feed, timestamp)) where FeedCachePolicy.validate(timestamp, against: currentDate()):
                 completion(.success(feed.toModels()))
                 /*
                  case .found:
@@ -66,7 +66,7 @@ extension LocalFeedLoader: FeedLoader {
                  case .empty:
                  completion(.success([]))
                  */
-            case .found, .empty:
+            case .success(.found), .success(.empty):
                 completion(.success([]))
             case .failure(let error):
                 // store.deleteCachedFeed { _ in }
@@ -85,11 +85,11 @@ extension LocalFeedLoader {
                 store.deleteCachedFeed { _ in }
             
             /// Jika retrieve berhasil menemukan cache, tetapi timestamp-nya `tidak lagi` valid (sudah lebih dari 7 hari), hapus cache tersebut dari store.
-            case let .found(_, timestamp) where !FeedCachePolicy.validate(timestamp, against: currentDate()):
+            case let .success(.found(_, timestamp)) where !FeedCachePolicy.validate(timestamp, against: currentDate()):
                 store.deleteCachedFeed { _ in }
             
             /// kenapa tidak membuat `default`? ini untuk menjaga kualitas unit test dan mengingatkan kita jika sebuah case gagal akan kesini alih2 membuatnya default.
-            case .empty, .found: break
+            case .success(.empty), .success(.found): break
             }
         }
     }
