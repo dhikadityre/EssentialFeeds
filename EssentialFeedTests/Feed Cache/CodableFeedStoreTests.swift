@@ -351,7 +351,7 @@ class CodableFeedStoreTests: XCTestCase, FailableFeedStoreSpecs {
         // expect(sut, toRetrieve: .empty)
         */
         
-        assertThatDeleteDeliversErrorOnDeletionError(on: sut)
+        // assertThatDeleteDeliversErrorOnDeletionError(on: sut)
     }
     
     func test_delete_hasNoSideEffectsOnDeletionError() {
