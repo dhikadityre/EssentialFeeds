@@ -19,19 +19,30 @@ public final class LocalFeedLoader {
 }
 
 extension LocalFeedLoader {
-    public typealias SaveResult = Error?
+    public typealias SaveResult = Result<Void, Error>
     
     public func save(_ feed: [FeedImage], completion: @escaping (SaveResult) -> Void) {
         /// Disini kita dapat menjalankan secara sync atau biarkan framework menjalankan secara async
         /// yang pasti adalah `deleteCachedFeed` harus dijalankan terlebih dahulu
         //// store.deleteCachedFeed()
         
+        /*
         store.deleteCachedFeed { [weak self] error in
             guard let self else { return }
             if let cacheDeletionError = error {
                 completion(cacheDeletionError)
             } else {
                 self.cache(feed, completion: completion)
+            }
+        }
+        */
+        
+        store.deleteCachedFeed { [weak self] deletionResult in
+            switch deletionResult {
+            case .success:
+                self?.cache(feed, completion: completion)
+            case .failure(let error):
+                completion(.failure(error))
             }
         }
     }
