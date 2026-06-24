@@ -138,6 +138,21 @@ final class FeedViewControllerTests: XCTestCase {
         assertThat(sut, isRendering: [image0, image1, image2, image3])
     }
     
+    /// ketika kita sudah memiliki feed yang di load. kita tidak ingin meng-invalidate current view saat ini
+    /// ex: jika kita berhasil load 3 image. image tersebut akan tetap di load
+    func test_loadFeedCompletion_doesNotAlterCurrentRenderingStateOnError() {
+        let image0 = makeImage()
+        let (sut, loader) = makeSUT()
+        
+        sut.loadViewIfNeeded()
+        loader.completeFeedLoading(with: [image0], at: 0)
+        assertThat(sut, isRendering: [image0])
+        
+        sut.simulateUserInitiatedFeedReload()
+        loader.completeFeedLoadingWithError(at: 1) // mencoba mentrigger error
+        assertThat(sut, isRendering: [image0]) // namun image tetap ada
+    }
+    
     // Mark: - Helper
     private func makeSUT(
         file: StaticString = #file, line: UInt = #line
@@ -221,6 +236,11 @@ final class FeedViewControllerTests: XCTestCase {
         
         func completeFeedLoading(with feed: [FeedImage] = [], at index: Int = 0) {
             completions[index](.success(feed))
+        }
+        
+        func completeFeedLoadingWithError(at index: Int = 0) {
+            let error = NSError(domain: "an error", code: 0)
+            completions[index](.failure(error))
         }
     }
 }
