@@ -8,7 +8,7 @@
 import UIKit
 import EssentialFeediOS
 
-private extension FeedViewController {
+extension FeedViewController {
     var isShowingLoadingIndicator: Bool {
         return refreshControl?.isRefreshing == true
     }
