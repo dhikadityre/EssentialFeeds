@@ -40,6 +40,6 @@ final class FeedViewModel {
             }
             // self?.isLoading = false
         }
-        onLoadingStateChange?(true)
+        onLoadingStateChange?(false)
     }
 }
