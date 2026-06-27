@@ -17,7 +17,10 @@ public final class FeedUIComposer {
         // feed controller -> refresh controller -> //feed controller -> refresh controller -> (presenter -> refresh controller) (presenter -> feed view) -> feed loader
         let presenter = FeedPresenter(feedLoader: feedLoader)
         
-        let refreshController = FeedRefreshViewController(presenter: presenter)
+        // let refreshController = FeedRefreshViewController(presenter: presenter)
+        let refreshController = FeedRefreshViewController(loadFeed: {
+            presenter.loadFeed()
+        })
         let feedController = FeedViewController(refreshController: refreshController)
         
         presenter.feedView = FeedViewAdapter(
