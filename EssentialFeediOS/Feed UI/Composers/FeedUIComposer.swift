@@ -12,54 +12,21 @@ public final class FeedUIComposer {
     private init() {}
     
     public static func feedComposedWith(feedLoader: FeedLoader, imageLoader: FeedImageDataLoader) -> FeedViewController {
-        // presenter -> feed loader
-        // refresh controller -> presenter -> // refresh controller -> presenter -> feed loader
-        // feed controller -> refresh controller -> //feed controller -> refresh controller -> (presenter -> refresh controller) (presenter -> feed view) -> feed loader
+        let presentationAdapter = FeedLoaderPresentationAdapter(feedLoader: feedLoader)
         
-        /*
-        let presenter = FeedPresenter(feedLoader: feedLoader)
-        
-        // let refreshController = FeedRefreshViewController(presenter: presenter)
-        let refreshController = FeedRefreshViewController(loadFeed: {
-            presenter.loadFeed()
-        })
-        */
-        
-        let presenter = FeedPresenter()
-        let presentationAdapter = FeedLoaderPresentationAdapter(feedLoader: feedLoader, presenter: presenter)
-        // let refreshController = FeedRefreshViewController(loadFeed: presentationAdapter.loadFeed)
         let refreshController = FeedRefreshViewController(delegate: presentationAdapter)
         
         let feedController = FeedViewController(refreshController: refreshController)
         
-        presenter.feedView = FeedViewAdapter(
+        let feedView = FeedViewAdapter(
             controller: feedController,
             imageLoader: imageLoader
         )
-        presenter.loadingView = WeakRefVirtualProxy(refreshController)
+        let presenter = FeedPresenter(feedView: feedView, loadingView: refreshController)
+        
+        presentationAdapter.presenter = presenter
         return feedController
     }
-    
-    /*
-    // [FeedImage] -> adapt -> [FeedImageCellController]
-    private static func adaptFeedToCellControllers(
-        forwardingTo controller: FeedViewController,
-        loader: FeedImageDataLoader
-    ) -> ([FeedImage]) -> Void {
-        return { [weak controller] feed in
-            controller?.tableModel = feed.map { model in
-                // FeedImageCellController(viewModel: FeedImageViewModel(model: model, imageLoader: loader))
-                FeedImageCellController(
-                    viewModel: FeedImageViewModel(
-                        model: model,
-                        imageLoader: loader,
-                        imageTransformer: UIImage.init
-                    )
-                )
-            }
-        }
-    }
-    */
 }
 
 private final class WeakRefVirtualProxy<T: AnyObject> {
@@ -98,23 +65,22 @@ private final class FeedViewAdapter: FeedView {
 }
 private final class FeedLoaderPresentationAdapter: FeedRefreshViewControllerDelegate {
     private let feedLoader: FeedLoader
-    private let presenter: FeedPresenter
+    var presenter: FeedPresenter?
     
-    init(feedLoader: FeedLoader, presenter: FeedPresenter) {
+    init(feedLoader: FeedLoader) {
         self.feedLoader = feedLoader
-        self.presenter = presenter
     }
     
     func didRequestFeedRefresh() {
-        presenter.didStartLoadingFeed()
+        presenter?.didStartLoadingFeed()
         
         feedLoader.load { [weak self] result in
             switch result {
             case let .success(feed):
-                self?.presenter.didFinishLoadingFeed(with: feed)
+                self?.presenter?.didFinishLoadingFeed(with: feed)
                 
             case let .failure(error):
-                self?.presenter.didFinishLoadingFeed(with: error)
+                self?.presenter?.didFinishLoadingFeed(with: error)
             }
         }
     }
