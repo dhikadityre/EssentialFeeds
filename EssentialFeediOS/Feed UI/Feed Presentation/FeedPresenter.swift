@@ -26,15 +26,19 @@ protocol FeedView {
 }
 
 final class FeedPresenter {
+    /*
     private let feedLoader: FeedLoader
     
     init(feedLoader: FeedLoader) {
         self.feedLoader = feedLoader
     }
     
+    */
+    
     var feedView: FeedView?
     var loadingView: FeedLoadingView?
     
+    /*
     func loadFeed() {
         loadingView?.display(viewModel: FeedLoadingViewModel(isLoading: true))
         feedLoader.load { [weak self] result in
@@ -42,6 +46,20 @@ final class FeedPresenter {
                 self?.feedView?.display(viewModel: FeedViewModels(feed: feed))
             }
         }
+        loadingView?.display(viewModel: FeedLoadingViewModel(isLoading: false))
+    }
+    */
+    
+    func didStartLoadingFeed() {
+        loadingView?.display(viewModel: FeedLoadingViewModel(isLoading: true))
+    }
+    
+    func didFinishLoadingFeed(with feed: [FeedImage]) {
+        feedView?.display(viewModel: FeedViewModels(feed: feed))
+        loadingView?.display(viewModel: FeedLoadingViewModel(isLoading: false))
+    }
+        
+    func didFinishLoadingFeed(with error: Error) {
         loadingView?.display(viewModel: FeedLoadingViewModel(isLoading: false))
     }
 }
