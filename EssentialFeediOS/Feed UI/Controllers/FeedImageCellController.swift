@@ -8,6 +8,7 @@
 import UIKit
 import EssentialFeed
 
+/*
 final class FeedImageCellController {
     private var viewModel: FeedImageViewModel<UIImage>
     
@@ -48,5 +49,40 @@ final class FeedImageCellController {
     
     func cancelLoad() {
         viewModel.cancelImageDataLoad()
+    }
+}
+*/
+
+protocol FeedImageCellControllerDelegate {
+    func didRequestImage()
+    func didCancelImageRequest()
+}
+
+final class FeedImageCellController: FeedImageView {
+    private let delegate: FeedImageCellControllerDelegate
+    private lazy var cell = FeedImageCell()
+    
+    init(delegate: FeedImageCellControllerDelegate) {
+        self.delegate = delegate
+    }
+    
+    func view() -> UITableViewCell {
+        delegate.didRequestImage()
+        return cell
+    }
+    
+    func preload() {
+        delegate.didRequestImage()
+    }
+    
+    func cancelLoad() {
+        delegate.didCancelImageRequest()
+    }
+    
+    func display(_ viewModel: FeedImageViewModels<UIImage>) {
+        cell.feedImageView.image = viewModel.image
+        cell.feedImageContainer.isShimmering = viewModel.isLoading
+        cell.feedImageRetryButton.isHidden = !viewModel.shouldRetry
+        cell.onRetry = delegate.didRequestImage
     }
 }
