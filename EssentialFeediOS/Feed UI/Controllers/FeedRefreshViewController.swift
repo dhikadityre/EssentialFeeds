@@ -7,6 +7,8 @@
 
 import UIKit
 
+// Di Remove karena kita menggunakan TableViewController
+/*
 protocol FeedRefreshViewControllerDelegate {
     func didRequestFeedRefresh()
 }
@@ -57,3 +59,4 @@ final class FeedRefreshViewController: NSObject, FeedLoadingView {
         delegate?.didRequestFeedRefresh()
     }
 }
+*/
