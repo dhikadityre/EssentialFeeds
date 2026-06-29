@@ -113,6 +113,7 @@
                         <connections>
                             <outlet property="dataSource" destination="ebA-CF-NQA" id="Xl2-pR-xOI"/>
                             <outlet property="delegate" destination="ebA-CF-NQA" id="bty-Vs-fit"/>
+                            <outlet property="prefetchDataSource" destination="ebA-CF-NQA" id="LCb-hP-4XU"/>
                         </connections>
                     </tableView>
                     <navigationItem key="navigationItem" title="My Feed" id="H2b-Ul-frm"/>
