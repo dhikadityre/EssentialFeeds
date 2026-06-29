@@ -24,6 +24,7 @@ public final class FeedUIComposer {
          */
         // mengatur refresh :
         feedController.delegate = presentationAdapter
+        feedController.title = FeedPresenter.title
         
         let feedView = FeedViewAdapter(
             controller: feedController,
