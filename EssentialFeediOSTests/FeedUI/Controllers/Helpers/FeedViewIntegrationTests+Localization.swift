@@ -1,5 +1,5 @@
 //
-//  FeedViewControllerTests+Localization.swift
+//  FeedViewIntegrationTests+Localization.swift
 //  EssentialFeed
 //
 //  Created by DHIKA ADITYA ARE on 30/06/26.
@@ -9,7 +9,7 @@ import Foundation
 import XCTest
 import EssentialFeediOS
 
-extension FeedViewControllerTests {
+extension FeedViewIntegrationTests {
     func localized(
         _ key: String,
         file: StaticString = #file, line: UInt = #line
