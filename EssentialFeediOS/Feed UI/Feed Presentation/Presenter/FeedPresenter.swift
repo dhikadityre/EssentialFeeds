@@ -36,7 +36,13 @@ final class FeedPresenter {
     */
     
     static var title: String {
-        return "My Feed"
+        // return "My Feed"
+        return NSLocalizedString(
+            "FEED_VIEW_TITLE",
+            tableName: "Feed",
+            bundle: Bundle(for: FeedPresenter.self), // bundle path adalah bundle yg sama dengan presenter class
+            comment: "Title for the feed view"
+        )
     }
     
     private let feedView: FeedView
