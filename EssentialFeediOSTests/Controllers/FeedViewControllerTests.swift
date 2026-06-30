@@ -25,8 +25,7 @@ final class FeedViewControllerTests: XCTestCase {
             table: "Feed"
         )
         
-        XCTAssertNotEqual(localizedKey, localizedTitle, "Missing localized string for key: \(localizedKey)")
-        XCTAssertEqual(sut.title, localizedTitle)
+        XCTAssertEqual(sut.title, localized("FEED_VIEW_TITLE"))
     }
     
     /*
