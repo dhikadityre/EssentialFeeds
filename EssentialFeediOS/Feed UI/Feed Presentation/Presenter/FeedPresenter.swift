@@ -24,10 +24,6 @@ protocol FeedView {
     func display(viewModel: FeedViewModels)
 }
 
-struct FeedErrorViewModel {
-    let message: String?
-}
-
 protocol FeedErrorView {
     func display(_ viewModel: FeedErrorViewModel)
 }
