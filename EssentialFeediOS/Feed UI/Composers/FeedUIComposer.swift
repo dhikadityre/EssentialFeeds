@@ -33,7 +33,8 @@ public final class FeedUIComposer {
         let presenter = FeedPresenter(
             feedView: feedView,
             // loadingView: WeakRefVirtualProxy(refreshController!)
-            loadingView: WeakRefVirtualProxy(feedController)
+            loadingView: WeakRefVirtualProxy(feedController),
+            errorView: WeakRefVirtualProxy(feedController)
         )
         
         

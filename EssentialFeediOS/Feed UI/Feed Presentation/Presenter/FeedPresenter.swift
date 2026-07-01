@@ -10,7 +10,6 @@ import EssentialFeed
 
 struct FeedLoadingViewModel {
     let isLoading: Bool
-    // let currentDate: Date // akan lebih mudah perubahan jika kita buat struct
 }
 
 protocol FeedLoadingView {
@@ -25,45 +24,46 @@ protocol FeedView {
     func display(viewModel: FeedViewModels)
 }
 
+struct FeedErrorViewModel {
+    let message: String
+}
+
+protocol FeedErrorView {
+    func display(_ viewModel: FeedErrorViewModel)
+}
+
 final class FeedPresenter {
-    /*
-    private let feedLoader: FeedLoader
-    
-    init(feedLoader: FeedLoader) {
-        self.feedLoader = feedLoader
-    }
-    
-    */
-    
     static var title: String {
-        // return "My Feed"
         return NSLocalizedString(
             "FEED_VIEW_TITLE",
             tableName: "Feed",
-            bundle: Bundle(for: FeedPresenter.self), // bundle path adalah bundle yg sama dengan presenter class
+            bundle: Bundle(for: FeedPresenter.self),
             comment: "Title for the feed view"
+        )
+    }
+    
+    private var feedLoadError: String {
+        return NSLocalizedString(
+            "FEED_VIEW_CONNECTION_ERROR",
+             tableName: "Feed",
+             bundle: Bundle(for: FeedPresenter.self),
+             comment: "Error message displayed when we can't load the image feed from the server"
         )
     }
     
     private let feedView: FeedView
     private let loadingView: FeedLoadingView
+    private let errorView: FeedErrorView
 
-    init(feedView: FeedView, loadingView: FeedLoadingView) {
+    init(
+        feedView: FeedView,
+        loadingView: FeedLoadingView,
+        errorView: FeedErrorView
+    ) {
         self.feedView = feedView
         self.loadingView = loadingView
+        self.errorView = errorView
     }
-    
-    /*
-    func loadFeed() {
-        loadingView?.display(viewModel: FeedLoadingViewModel(isLoading: true))
-        feedLoader.load { [weak self] result in
-            if let feed = try? result.get() {
-                self?.feedView?.display(viewModel: FeedViewModels(feed: feed))
-            }
-        }
-        loadingView?.display(viewModel: FeedLoadingViewModel(isLoading: false))
-    }
-    */
     
     func didStartLoadingFeed() {
         loadingView.display(viewModel: FeedLoadingViewModel(isLoading: true))
@@ -75,6 +75,7 @@ final class FeedPresenter {
     }
         
     func didFinishLoadingFeed(with error: Error) {
+        errorView.display(FeedErrorViewModel(message: feedLoadError))
         loadingView.display(viewModel: FeedLoadingViewModel(isLoading: false))
     }
 }
