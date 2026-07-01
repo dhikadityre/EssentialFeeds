@@ -11,10 +11,15 @@ protocol FeedViewControllerDelegate {
     func didRequestFeedRefresh()
 }
 
+public final class ErrorView: UIView {
+    public var message: String?
+}
+
 public final class FeedViewController: UITableViewController, UITableViewDataSourcePrefetching, FeedLoadingView {
     private var imageLoader: FeedImageDataLoader?
     
     // @IBOutlet var refreshController: FeedRefreshViewController?
+    public let errorView = ErrorView()
     
     var delegate: FeedViewControllerDelegate?
     var tableModel = [FeedImageCellController]() {
