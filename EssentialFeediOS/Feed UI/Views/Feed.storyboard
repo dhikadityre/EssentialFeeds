@@ -19,7 +19,24 @@
                         <view key="tableHeaderView" contentMode="scaleToFill" id="kWU-3S-1ja" customClass="ErrorView" customModule="EssentialFeediOS" customModuleProvider="target">
                             <rect key="frame" x="0.0" y="0.0" width="393" height="44"/>
                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            <subviews>
+                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ZOX-5g-7KK">
+                                    <rect key="frame" x="8" y="8" width="377" height="28"/>
+                                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                    <nil key="textColor"/>
+                                    <nil key="highlightedColor"/>
+                                </label>
+                            </subviews>
                             <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                            <constraints>
+                                <constraint firstAttribute="trailing" secondItem="ZOX-5g-7KK" secondAttribute="trailing" constant="8" id="Sl3-Cr-sz6"/>
+                                <constraint firstAttribute="bottom" secondItem="ZOX-5g-7KK" secondAttribute="bottom" constant="8" id="SuS-bL-AEp"/>
+                                <constraint firstItem="ZOX-5g-7KK" firstAttribute="top" secondItem="kWU-3S-1ja" secondAttribute="top" constant="8" id="qdp-Lh-uEd"/>
+                                <constraint firstItem="ZOX-5g-7KK" firstAttribute="leading" secondItem="kWU-3S-1ja" secondAttribute="leading" constant="8" id="vvO-h1-lJU"/>
+                            </constraints>
+                            <connections>
+                                <outlet property="label" destination="ZOX-5g-7KK" id="hYT-pl-uwA"/>
+                            </connections>
                         </view>
                         <view key="tableFooterView" contentMode="scaleToFill" id="zU6-Uo-drv">
                             <rect key="frame" x="0.0" y="722" width="393" height="44"/>
