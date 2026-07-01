@@ -173,13 +173,15 @@ final class FeedViewIntegrationTests: XCTestCase {
     
     func test_loadFeedCompletion_rendersErrorMessageOnError() {
         let (sut, loader) = makeSUT()
-        
+
         sut.loadViewIfNeeded()
-        
         XCTAssertEqual(sut.errorMessage, nil)
-        
+
         loader.completeFeedLoadingWithError(at: 0)
         XCTAssertEqual(sut.errorMessage, localized("FEED_VIEW_CONNECTION_ERROR"))
+        
+        sut.simulateUserInitiatedFeedReload()
+        XCTAssertEqual(sut.errorMessage, nil)
     }
     
     func test_feedImageView_loadsImageURLWhenVisible() {
