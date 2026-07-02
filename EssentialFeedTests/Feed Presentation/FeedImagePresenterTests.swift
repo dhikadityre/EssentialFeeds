@@ -25,7 +25,6 @@ class FeedImagePresenterTests: XCTestCase {
     }
     
     func test_didFinishLoadingImageData_displaysRetryOnFailedImageTransformation() {
-        // let (sut, view) = makeSUT(imageTransformer: { _ in nil })
         let (sut, view) = makeSUT(imageTransformer: fail)
         let image = uniqueImage()
         
