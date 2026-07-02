@@ -5,8 +5,8 @@
 //  Created by DHIKA ADITYA ARE on 26/06/26.
 //
 
-import UIKit
 import EssentialFeed
+import Foundation
 
 public protocol FeedImageDataLoaderTask {
     func cancel()
