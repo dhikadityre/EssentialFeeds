@@ -346,7 +346,7 @@ class URLSessionHTTPClientTests: XCTestCase {
         file: StaticString = #file, line: UInt = #line
     ) -> HTTPClient.Result? {
         // URLProtocolStub.stub(url: anyURL(), data: data, response: response, error: error) // penyesuaian berdasarkan table
-        values.map { URLProtocolStub.stub(data: $0, response: $1, error: $2) }
+        values.map { URLProtocolStub.stub(data: $0.data, response: $0.response, error: $0.error) }
         
         let sut = makeSUT(file: file, line: line)
         let exp = expectation(description: "Wait for completion")
@@ -381,6 +381,10 @@ class URLSessionHTTPClientTests: XCTestCase {
             set { queue.sync { _stub = newValue } }
         }
 
+        static func stub(data: Data?, response: URLResponse?, error: Error?) {
+            stub = Stub(data: data, response: response, error: error, requestObserver: nil)
+        }
+
         private static let queue = DispatchQueue(label: "URLProtocolStub.queue")
         
         static func observeRequest(observer: @escaping (URLRequest) -> Void) {
@@ -410,7 +414,7 @@ class URLSessionHTTPClientTests: XCTestCase {
             guard let url = request.url else { return false }
             return URLProtocolStub.stubs[url] != nil // if ada url -> true
             */
-            // requestObserver?(request)
+            stub?.requestObserver?(request)
             return true
         }
         
