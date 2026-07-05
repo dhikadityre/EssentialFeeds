@@ -97,7 +97,7 @@ extension LocalFeedLoader {
             guard let self else { return }
             switch result {
             case .failure:
-                store.deleteCachedFeed { _ in completion(.success(())) }
+                store.deleteCachedFeed(completion: completion)
             
             /// Jika retrieve berhasil menemukan cache, tetapi timestamp-nya `tidak lagi` valid (sudah lebih dari 7 hari), hapus cache tersebut dari store.
             case let .success(.some(cache)) where !FeedCachePolicy.validate(cache.timestamp, against: currentDate()):
