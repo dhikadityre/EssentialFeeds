@@ -101,7 +101,7 @@ extension LocalFeedLoader {
             
             /// Jika retrieve berhasil menemukan cache, tetapi timestamp-nya `tidak lagi` valid (sudah lebih dari 7 hari), hapus cache tersebut dari store.
             case let .success(.some(cache)) where !FeedCachePolicy.validate(cache.timestamp, against: currentDate()):
-                store.deleteCachedFeed { _ in completion(.success(())) }
+                store.deleteCachedFeed(completion: completion)
             
             /// kenapa tidak membuat `default`? ini untuk menjaga kualitas unit test dan mengingatkan kita jika sebuah case gagal akan kesini alih2 membuatnya default.
             case .success(.none), .success:
