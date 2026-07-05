@@ -30,7 +30,7 @@ class ValidateFeedCacheUseCaseTests: XCTestCase {
     func test_validateCache_deleteCachesOnRetrievalError() {
         let (sut, store) = makeSUT()
         
-        sut.validateCache()
+        sut.validateCache { _ in }
         store.completeRetrieval(with: anyNSError())
         
         XCTAssertEqual(store.receivedMessage, [.retrieve, .deleteCachedFeed])
@@ -40,7 +40,7 @@ class ValidateFeedCacheUseCaseTests: XCTestCase {
     func test_validateCache_doesNotdeleteCachesOnEmptyCache() {
         let (sut, store) = makeSUT()
         
-        sut.validateCache()
+        sut.validateCache { _ in }
         store.completeRetrieveWithEmptyCache()
         
         XCTAssertEqual(store.receivedMessage, [.retrieve])
@@ -56,7 +56,7 @@ class ValidateFeedCacheUseCaseTests: XCTestCase {
             .minusFeedCacheMaxAge()
             .adding(seconds: 1)
         
-        sut.validateCache()
+        sut.validateCache { _ in }
         store.completeRetrieval(with: feed.local, timestamp: nonExpiredTimestamp)
         
         XCTAssertEqual(store.receivedMessage, [.retrieve])
@@ -71,7 +71,7 @@ class ValidateFeedCacheUseCaseTests: XCTestCase {
         
         let (sut, store) = makeSUT(currentDate: { fixedCurrentDate })
         
-        sut.validateCache()
+        sut.validateCache { _ in }
         store.completeRetrieval(with: feed.local, timestamp: expirationTimestamp)
         
         XCTAssertEqual(store.receivedMessage, [.retrieve, .deleteCachedFeed])
@@ -87,7 +87,7 @@ class ValidateFeedCacheUseCaseTests: XCTestCase {
         
         let (sut, store) = makeSUT(currentDate: { fixedCurrentDate })
         
-        sut.validateCache()
+        sut.validateCache { _ in }
         store.completeRetrieval(with: feed.local, timestamp: expiredTimestamp)
         
         XCTAssertEqual(store.receivedMessage, [.retrieve, .deleteCachedFeed])
@@ -100,7 +100,7 @@ class ValidateFeedCacheUseCaseTests: XCTestCase {
             currentDate: Date.init
         )
         
-        localFeedLoader?.validateCache()
+        localFeedLoader?.validateCache { _ in }
         localFeedLoader = nil
         
         store.completeRetrieval(with: anyNSError())
