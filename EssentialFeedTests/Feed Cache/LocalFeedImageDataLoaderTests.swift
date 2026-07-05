@@ -26,18 +26,38 @@ final class LocalFeedImageDataLoader: FeedImageDataLoader {
         case notFound
     }
     
-    private struct Task: FeedImageDataLoaderTask {
-        func cancel() {}
+    private final class Task: FeedImageDataLoaderTask {
+        private var completion: ((FeedImageDataLoader.Result) -> Void)?
+        
+        init(_ completion: @escaping (FeedImageDataLoader.Result) -> Void) {
+            self.completion = completion
+        }
+        
+        func complete(with result: FeedImageDataLoader.Result) {
+            completion?(result)
+        }
+        
+        private func preventFurtherCompletions() {
+            completion = nil
+        }
+        
+        func cancel() {
+            preventFurtherCompletions()
+        }
     }
     
     func loadImageData(from url: URL, completion: @escaping (FeedImageDataLoader.Result) -> Void) -> FeedImageDataLoaderTask {
+        let task = Task(completion)
+        
         store.retrieve(dataForURL: url) { result in
-            completion(result
+            task.complete(with: result
                 .mapError { _ in Error.failed }
-                .flatMap { data in data.map { .success($0) } ?? .failure(Error.notFound) }
+                .flatMap { data in
+                    data.map { .success($0) } ?? .failure(Error.notFound)
+                }
             )
         }
-        return Task()
+        return task
     }
 }
 
@@ -82,6 +102,21 @@ class LocalFeedImageDataLoaderTests: XCTestCase {
         expect(sut, toCompleteWith: .success(foundData), when: {
             store.complete(with: foundData)
         })
+    }
+    
+    func test_loadImageDataFromURL_doesNotDeliverResultAfterCancellingTask() {
+        let (sut, store) = makeSUT()
+        let foundData = anyData()
+        
+        var received = [FeedImageDataLoader.Result]()
+        let task = sut.loadImageData(from: anyURL()) { received.append($0) }
+        task.cancel()
+        
+        store.complete(with: foundData)
+        store.complete(with: .none)
+        store.complete(with: anyNSError())
+        
+        XCTAssertTrue(received.isEmpty, "Expected no received results after cancelling task")
     }
     
     // MARK: - Helpers
@@ -131,6 +166,10 @@ class LocalFeedImageDataLoaderTests: XCTestCase {
     
     private func notFound() -> FeedImageDataLoader.Result {
         return .failure(LocalFeedImageDataLoader.Error.notFound)
+    }
+    
+    private func never(file: StaticString = #file, line: UInt = #line) {
+        XCTFail("Expected no no invocations", file: file, line: line)
     }
     
     private class StoreSpy: FeedImageDataStore {
