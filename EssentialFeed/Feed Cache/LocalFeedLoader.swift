@@ -88,19 +88,24 @@ extension LocalFeedLoader: FeedLoader {
 }
  
 extension LocalFeedLoader {
-    public func validateCache() {
+    public typealias ValidationResult = Result<Void, Error>
+    
+    public func validateCache(
+        completion: @escaping (ValidationResult) -> Void = { _ in }
+    ) {
         store.retrieve { [weak self] result in
             guard let self else { return }
             switch result {
             case .failure:
-                store.deleteCachedFeed { _ in }
+                store.deleteCachedFeed { _ in completion(.success(())) }
             
             /// Jika retrieve berhasil menemukan cache, tetapi timestamp-nya `tidak lagi` valid (sudah lebih dari 7 hari), hapus cache tersebut dari store.
             case let .success(.some(cache)) where !FeedCachePolicy.validate(cache.timestamp, against: currentDate()):
-                store.deleteCachedFeed { _ in }
+                store.deleteCachedFeed { _ in completion(.success(())) }
             
             /// kenapa tidak membuat `default`? ini untuk menjaga kualitas unit test dan mengingatkan kita jika sebuah case gagal akan kesini alih2 membuatnya default.
-            case .success(.none), .success: break
+            case .success(.none), .success:
+                completion(.success(()))
             }
         }
     }
