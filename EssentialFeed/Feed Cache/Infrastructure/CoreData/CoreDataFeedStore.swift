@@ -50,6 +50,7 @@ public final class CoreDataFeedStore: FeedStore {
 //        let context = self.context
 //        context.perform {
         perform { context in
+            
             do {
                 /*
                 let request = NSFetchRequest<ManagedCache>(entityName: ManagedCache.entity().name!)
@@ -82,6 +83,13 @@ public final class CoreDataFeedStore: FeedStore {
             } catch {
                 completion(.failure(error))
             }
+            
+            
+            completion(Result {
+                try ManagedCache.find(in: context).map {
+                    CacheFeed(feed: $0.localFeed, timestamp: $0.timestamp)
+                }
+            })
         }
     }
     
